@@ -1,6 +1,9 @@
 package cm.project.android.projectx
 
 import android.os.Bundle
+import android.os.StrictMode
+import android.os.StrictMode.ThreadPolicy
+import android.preference.PreferenceManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,11 +13,23 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import cm.project.android.projectx.ui.App
 import cm.project.android.projectx.ui.theme.ProjectXTheme
+import org.osmdroid.config.Configuration
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val policy = ThreadPolicy.Builder().permitAll().build()
+        StrictMode.setThreadPolicy(policy)
+
+        Configuration.getInstance().load(
+            applicationContext,
+            PreferenceManager.getDefaultSharedPreferences(applicationContext)
+        )
+
         setContent {
             ProjectXTheme {
                 // A surface container using the 'background' color from the theme
@@ -22,7 +37,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting("Android")
+                    App()
                 }
             }
         }
