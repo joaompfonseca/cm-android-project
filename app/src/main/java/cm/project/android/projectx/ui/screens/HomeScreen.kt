@@ -10,7 +10,7 @@ fun HomeScreen(
     appUiState: AppUiState, modifier: Modifier = Modifier
 ) {
     when (appUiState) {
-        is AppUiState.Map -> MapScreen(appUiState.pointsOfInterest, modifier = modifier.fillMaxSize())
+        is AppUiState.Map -> MapScreen(center = appUiState.center,modifier = modifier.fillMaxSize())
         else -> {}
     }
 }
