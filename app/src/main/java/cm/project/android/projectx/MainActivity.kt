@@ -16,13 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
 import cm.project.android.projectx.ui.App
 import cm.project.android.projectx.ui.theme.ProjectXTheme
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationServices
 import com.google.firebase.FirebaseApp
 import org.osmdroid.config.Configuration
-import java.util.concurrent.TimeUnit
 
 
 class MainActivity : ComponentActivity() {
@@ -48,13 +43,6 @@ class MainActivity : ComponentActivity() {
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
             ActivityCompat.requestPermissions(
                 this as Activity,
                 arrayOf(

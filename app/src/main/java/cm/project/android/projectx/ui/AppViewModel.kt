@@ -1,21 +1,13 @@
 package cm.project.android.projectx.ui
 
-import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.Application
-import android.content.pm.PackageManager
 import android.os.Looper
-import android.util.Log
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.core.app.ActivityCompat
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import cm.project.android.projectx.MainActivity
 import cm.project.android.projectx.db.entities.POI
 import cm.project.android.projectx.db.repositories.POIRepository
 import cm.project.android.projectx.network.AppApi
@@ -23,7 +15,6 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
-import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationServices.getFusedLocationProviderClient
 import com.google.android.gms.location.Priority
 import com.utsman.osmandcompose.CameraProperty

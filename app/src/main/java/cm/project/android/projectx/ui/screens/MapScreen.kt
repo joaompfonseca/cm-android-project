@@ -28,8 +28,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cm.project.android.projectx.R
 import cm.project.android.projectx.ui.AppViewModel
-import com.utsman.osmandcompose.CameraProperty
-import com.utsman.osmandcompose.CameraState
 import com.utsman.osmandcompose.MapProperties
 import com.utsman.osmandcompose.Marker
 import com.utsman.osmandcompose.MarkerState
