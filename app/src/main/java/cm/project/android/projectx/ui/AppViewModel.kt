@@ -26,6 +26,8 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationServices.getFusedLocationProviderClient
 import com.google.android.gms.location.Priority
+import com.utsman.osmandcompose.CameraProperty
+import com.utsman.osmandcompose.CameraState
 import kotlinx.coroutines.launch
 import org.osmdroid.util.GeoPoint
 import java.util.concurrent.TimeUnit
@@ -44,7 +46,14 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     var poiList by mutableStateOf(listOf<POI>())
         private set
 
-    var center by mutableStateOf(GeoPoint(40.64427, -8.64554)) // Aveiro
+    var camera by mutableStateOf(
+        CameraState(
+            CameraProperty(
+                geoPoint = GeoPoint(40.64427, -8.64554),
+                zoom = 14.0
+            )
+        )
+    )
         private set
 
     var location by mutableStateOf<GeoPoint?>(null)
@@ -76,6 +85,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         fusedLocationProviderClient.lastLocation.addOnSuccessListener {
             if (it != null) {
                 location = GeoPoint(it.latitude, it.longitude)
+                gotoUserLocation() // Center map on user location
             }
         }
         // Update location if there are changes
@@ -98,13 +108,31 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun gotoUserLocation() {
+        viewModelScope.launch {
+            if (location != null) {
+                camera = CameraState(
+                    CameraProperty(
+                        geoPoint = location as GeoPoint,
+                        zoom = 18.0
+                    )
+                )
+            }
+        }
+    }
+
     fun getSearchGeocode(query: String) {
         viewModelScope.launch {
             val res = AppApi.geocodeService.getGeocode(query)
             // Consider only the first result
             if (res["items"]?.isNotEmpty() == true) {
                 val item = res["items"]!![0]
-                center = GeoPoint(item.position.lat, item.position.lng)
+                camera = CameraState(
+                    CameraProperty(
+                        geoPoint = GeoPoint(item.position.lat, item.position.lng),
+                        zoom = 14.0
+                    )
+                )
             }
         }
     }

@@ -1,8 +1,5 @@
 package cm.project.android.projectx.ui.screens
 
-import android.app.Application
-import android.graphics.drawable.Drawable
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,7 +10,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.SearchBar
+import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -28,7 +25,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat.getDrawable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cm.project.android.projectx.R
 import cm.project.android.projectx.ui.AppViewModel
@@ -43,7 +39,6 @@ import com.utsman.osmandcompose.rememberOverlayManagerState
 import org.osmdroid.tileprovider.tilesource.ITileSource
 import org.osmdroid.tileprovider.tilesource.XYTileSource
 import org.osmdroid.util.GeoPoint
-import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 
 
 @Composable
@@ -51,12 +46,6 @@ fun MapScreen(
     modifier: Modifier = Modifier,
     vm: AppViewModel = viewModel()
 ) {
-    val cameraState = CameraState(
-        CameraProperty(
-            geoPoint = vm.center,
-            zoom = 13.0
-        )
-    )
 
     val cyclOSM: ITileSource = XYTileSource(
         "CyclOSM", 1, 18, 256, ".png", arrayOf(
@@ -83,7 +72,7 @@ fun MapScreen(
     Box(modifier = modifier.fillMaxSize()) {
         OpenStreetMap(
             modifier = modifier.fillMaxSize(),
-            cameraState = cameraState,
+            cameraState = vm.camera,
             overlayManagerState = rememberOverlayManagerState(),
             properties = mapProperties,
             onMapClick = {
@@ -128,6 +117,14 @@ fun MapScreen(
                 .width(200.dp)
                 .size(50.dp)
         )
+        Button(
+            onClick = { vm.gotoUserLocation() },
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 20.dp)
+        ) {
+            Text(text = "Find me!")
+        }
     }
 }
 
