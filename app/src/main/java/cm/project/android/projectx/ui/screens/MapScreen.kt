@@ -1,5 +1,8 @@
 package cm.project.android.projectx.ui.screens
 
+import android.app.Application
+import android.graphics.drawable.Drawable
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,9 +25,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat.getDrawable
 import androidx.lifecycle.viewmodel.compose.viewModel
+import cm.project.android.projectx.R
 import cm.project.android.projectx.ui.AppViewModel
 import com.utsman.osmandcompose.CameraProperty
 import com.utsman.osmandcompose.CameraState
@@ -37,6 +43,7 @@ import com.utsman.osmandcompose.rememberOverlayManagerState
 import org.osmdroid.tileprovider.tilesource.ITileSource
 import org.osmdroid.tileprovider.tilesource.XYTileSource
 import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 
 
 @Composable
@@ -106,6 +113,12 @@ fun MapScreen(
                     }
                 }
             }
+            Marker(
+                icon = LocalContext.current.getDrawable(R.drawable.user_location),
+                state = MarkerState(
+                    geoPoint = vm.location ?: GeoPoint(0.0, 0.0)
+                )
+            )
         }
         SearchBar(
             search = { vm.getSearchGeocode(it) },
@@ -113,7 +126,8 @@ fun MapScreen(
                 .align(Alignment.TopCenter)
                 .padding(top = 20.dp)
                 .width(200.dp)
-                .size(50.dp))
+                .size(50.dp)
+        )
     }
 }
 

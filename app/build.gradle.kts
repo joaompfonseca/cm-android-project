@@ -77,4 +77,5 @@ dependencies {
     // Import the BoM for the Firebase platform
     implementation(platform("com.google.firebase:firebase-bom:32.3.1"))
     implementation("com.google.firebase:firebase-database-ktx")
+    implementation("com.google.android.gms:play-services-location:21.0.1")
 }
