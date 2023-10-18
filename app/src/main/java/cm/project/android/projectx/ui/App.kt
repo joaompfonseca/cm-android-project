@@ -16,9 +16,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.viewmodel.compose.viewModel
 import cm.project.android.projectx.R
-import cm.project.android.projectx.ui.screens.HomeScreen
+import cm.project.android.projectx.ui.screens.MapScreen
 
 @Composable
 fun App() {
@@ -32,8 +31,7 @@ fun App() {
                 .fillMaxSize()
                 .padding(it)
         ) {
-            val appViewModel: AppViewModel = viewModel()
-            HomeScreen(appUiState = appViewModel.appUiState)
+            MapScreen()
         }
     }
 }

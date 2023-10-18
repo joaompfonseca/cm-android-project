@@ -5,31 +5,23 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import cm.project.android.projectx.network.AppApi
+import cm.project.android.projectx.db.entities.POI
+import cm.project.android.projectx.db.repositories.POIRepository
 import kotlinx.coroutines.launch
-import java.io.IOException
-
-sealed interface AppUiState {
-    data class Map(val pointsOfInterest: List<String>) : AppUiState
-    object Error : AppUiState
-}
 
 class AppViewModel : ViewModel() {
-    var appUiState: AppUiState by mutableStateOf(AppUiState.Map(emptyList())) // Call API
+
+    val poiRepository = POIRepository()
+    var poiList by mutableStateOf(listOf<POI>())
         private set
 
     init {
-        // getPointsOfInterest()
+        getPOIs()
     }
 
-    fun getPointsOfInterest() {
+    fun getPOIs() {
         viewModelScope.launch {
-            appUiState = try {
-                val pointsOfInterest = AppApi.retrofitService.getPOIs()
-                AppUiState.Map(pointsOfInterest)
-            } catch (e: IOException) {
-                AppUiState.Error
-            }
+            poiList = poiRepository.getAllPOIs()
         }
     }
 }

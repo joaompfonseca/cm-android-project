@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "35931131471",
+    "firebase_url": "https://cm-android-project-39eba-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "cm-android-project-39eba",
+    "storage_bucket": "cm-android-project-39eba.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:35931131471:android:89253caaadf6dead3ee43a",
+        "android_client_info": {
+          "package_name": "cm.project.android.projectx"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCQMTUePSxGgxzHquPS2LDhdp70DMoqJkQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
