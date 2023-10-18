@@ -2,6 +2,7 @@ package cm.project.android.projectx.ui
 
 import android.annotation.SuppressLint
 import android.app.Application
+import android.content.om.OverlayManager
 import android.os.Looper
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -19,6 +20,9 @@ import com.google.android.gms.location.LocationServices.getFusedLocationProvider
 import com.google.android.gms.location.Priority
 import com.utsman.osmandcompose.CameraProperty
 import com.utsman.osmandcompose.CameraState
+import com.utsman.osmandcompose.MarkerState
+import com.utsman.osmandcompose.OverlayManagerState
+import com.utsman.osmandcompose.rememberOverlayManagerState
 import kotlinx.coroutines.launch
 import org.osmdroid.util.GeoPoint
 import java.util.concurrent.TimeUnit
@@ -49,7 +53,6 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
     var location by mutableStateOf<GeoPoint?>(null)
         private set
-
 
     init {
 
@@ -125,6 +128,12 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                     )
                 )
             }
+        }
+    }
+
+    fun addPOI(poi: POI) {
+        viewModelScope.launch {
+            poiRepository.savePOI(poi)
         }
     }
 }

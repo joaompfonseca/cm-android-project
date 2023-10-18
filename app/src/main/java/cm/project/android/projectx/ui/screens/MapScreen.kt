@@ -10,14 +10,23 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,17 +43,19 @@ import com.utsman.osmandcompose.MarkerState
 import com.utsman.osmandcompose.OpenStreetMap
 import com.utsman.osmandcompose.ZoomButtonVisibility
 import com.utsman.osmandcompose.rememberOverlayManagerState
+import kotlinx.coroutines.launch
 import org.osmdroid.tileprovider.tilesource.ITileSource
 import org.osmdroid.tileprovider.tilesource.XYTileSource
 import org.osmdroid.util.GeoPoint
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapScreen(
     modifier: Modifier = Modifier,
-    vm: AppViewModel = viewModel()
+    vm: AppViewModel = viewModel(),
+    onAddPOI: () -> Unit
 ) {
-
     val cyclOSM: ITileSource = XYTileSource(
         "CyclOSM", 1, 18, 256, ".png", arrayOf(
             "https://a.tile-cyclosm.openstreetmap.fr/cyclosm/",
@@ -69,9 +80,8 @@ fun MapScreen(
 
     Box(modifier = modifier.fillMaxSize()) {
         OpenStreetMap(
-            modifier = modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize(),
             cameraState = vm.camera,
-            overlayManagerState = rememberOverlayManagerState(),
             properties = mapProperties,
             onMapClick = {
                 println("on click  -> $it")
@@ -109,7 +119,7 @@ fun MapScreen(
         }
         SearchBar(
             search = { vm.getSearchGeocode(it) },
-            Modifier
+            modifier = Modifier
                 .align(Alignment.TopCenter)
                 .padding(top = 20.dp)
                 .width(200.dp)
@@ -122,6 +132,19 @@ fun MapScreen(
                 .padding(bottom = 20.dp)
         ) {
             Text(text = "Find me!")
+        }
+        if (vm.location != null) {
+            Button(
+                onClick = {
+                    onAddPOI()
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(bottom = 20.dp)
+            ) {
+                Icon(imageVector = Icons.Default.Add, contentDescription = "Add POI")
+                Text(text = "Add POI")
+            }
         }
     }
 }

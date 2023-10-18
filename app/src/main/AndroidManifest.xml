@@ -31,8 +31,16 @@
         </activity>
         <service
             android:name="MyNavigationService"
-            android:foregroundServiceType="location">
-    </service>
+            android:foregroundServiceType="location"></service>
+        <provider
+            android:name=".ui.screens.ComposeFileProvider"
+            android:authorities="cm.project.android.projectx.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/filepaths" />
+        </provider>
     </application>
 
 </manifest>
