@@ -2,16 +2,22 @@ package cm.project.android.projectx.ui
 
 import android.annotation.SuppressLint
 import android.app.Application
+import android.content.Context
 import android.content.om.OverlayManager
+import android.net.Uri
 import android.os.Looper
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import cm.project.android.projectx.db.entities.POI
 import cm.project.android.projectx.db.repositories.POIRepository
 import cm.project.android.projectx.network.AppApi
+import cm.project.android.projectx.network.entities.GeocodeDto
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -53,6 +59,8 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
     var location by mutableStateOf<GeoPoint?>(null)
         private set
+
+    var route by mutableStateOf(false)
 
     init {
 
@@ -115,9 +123,18 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun getSearchGeocode(query: String) {
+    fun getSearch(query: String) {
         viewModelScope.launch {
-            val res = AppApi.geocodeService.getGeocode(query)
+            Log.e("AppViewModel", "Query: $query")
+            var res: HashMap<String, List<GeocodeDto>>? = null
+            val isMatch = Regex("^(-?\\d+(\\.\\d+)?),\\s*(-?\\d+(\\.\\d+)?)\$").matches(query)
+            if (isMatch) {
+                Log.e("AppViewModel", "Reverse geocoding")
+                res = AppApi.revGeocodeService.getRevGeocode(query)
+            } else {
+                Log.e("AppViewModel", "Geocoding")
+                res =  AppApi.geocodeService.getGeocode(query)
+            }
             // Consider only the first result
             if (res["items"]?.isNotEmpty() == true) {
                 val item = res["items"]!![0]
@@ -127,6 +144,30 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                         zoom = 14.0
                     )
                 )
+            }
+        }
+    }
+
+    fun getRoute(query: String, context: Context){
+        viewModelScope.launch {
+            Log.e("AppViewModel", "Query: $query")
+            var res: HashMap<String, List<GeocodeDto>>? = null
+            val isMatch = Regex("^(-?\\d+(\\.\\d+)?),\\s*(-?\\d+(\\.\\d+)?)\$").matches(query)
+            if (isMatch) {
+                Log.e("AppViewModel", "Reverse geocoding")
+                res = AppApi.revGeocodeService.getRevGeocode(query)
+            } else {
+                Log.e("AppViewModel", "Geocoding")
+                res =  AppApi.geocodeService.getGeocode(query)
+            }
+            // Consider only the first result
+            if (res["items"]?.isNotEmpty() == true) {
+                val lat = res["items"]!![0].position.lat
+                val lng = res["items"]!![0].position.lng
+                val gmmIntentUri = Uri.parse("google.navigation:q=$lat,$lng&mode=b")
+                val mapIntent = android.content.Intent(android.content.Intent.ACTION_VIEW, gmmIntentUri)
+                mapIntent.setPackage("com.google.android.apps.maps")
+                startActivity(context, mapIntent, null)
             }
         }
     }

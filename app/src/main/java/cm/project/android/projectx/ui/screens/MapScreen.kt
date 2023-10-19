@@ -3,6 +3,7 @@ package cm.project.android.projectx.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -17,6 +18,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -56,6 +58,9 @@ fun MapScreen(
     vm: AppViewModel = viewModel(),
     onAddPOI: () -> Unit
 ) {
+
+    val context = LocalContext.current
+
     val cyclOSM: ITileSource = XYTileSource(
         "CyclOSM", 1, 18, 256, ".png", arrayOf(
             "https://a.tile-cyclosm.openstreetmap.fr/cyclosm/",
@@ -117,14 +122,29 @@ fun MapScreen(
                 )
             )
         }
-        SearchBar(
-            search = { vm.getSearchGeocode(it) },
+        if (!vm.route) {
+            SearchBar(
+                search = { vm.getSearch(it) },
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 20.dp)
+                    .width(200.dp)
+                    .size(50.dp)
+            )
+        }
+        Button(
+            onClick = { vm.route = !vm.route },
             modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = 20.dp)
-                .width(200.dp)
-                .size(50.dp)
-        )
+                .align(Alignment.BottomStart)
+                .padding(bottom = 20.dp)
+        ) {
+            Text(text = "Route")
+        }
+        if (vm.route) {
+            OriginDestination(
+                routing = { vm.getRoute(it, context) }
+            )
+        }
         Button(
             onClick = { vm.gotoUserLocation() },
             modifier = Modifier
@@ -145,6 +165,41 @@ fun MapScreen(
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Add POI")
                 Text(text = "Add POI")
             }
+        }
+    }
+}
+
+@Composable
+fun OriginDestination(
+    routing: (String) -> Unit
+){
+    var dest by remember { mutableStateOf("") }
+    Column(modifier = Modifier
+        .padding(20.dp)
+        .background(color = Color.White, shape = RoundedCornerShape(12.dp))) {
+        Row(modifier = Modifier) {
+            Text(text = " Origin:         ", modifier = Modifier.padding(top = 20.dp))
+            TextField(value = "Current Location",
+                onValueChange = { },
+                readOnly = true,
+                modifier = Modifier.width(200.dp))
+        }
+        Row {
+            Text(text = " Destination:", modifier = Modifier.padding(top = 20.dp))
+            TextField(
+                value = dest,
+                onValueChange = { dest = it },
+                label = { Text("Destination") },
+                keyboardActions = KeyboardActions(
+                    onSearch = {
+                        routing(dest)
+                    }
+                ),
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Search
+                ),
+                modifier = Modifier.width(200.dp)
+                )
         }
     }
 }
