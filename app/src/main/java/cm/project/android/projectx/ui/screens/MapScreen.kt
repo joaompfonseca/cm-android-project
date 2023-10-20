@@ -1,5 +1,6 @@
 package cm.project.android.projectx.ui.screens
 
+import android.app.Application
 import android.util.Log
 import coil.compose.AsyncImage
 import androidx.compose.foundation.background
@@ -18,6 +19,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -35,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cm.project.android.projectx.R
 import cm.project.android.projectx.ui.AppViewModel
+import com.firebase.ui.auth.AuthUI
 import com.utsman.osmandcompose.MapProperties
 import com.utsman.osmandcompose.Marker
 import com.utsman.osmandcompose.MarkerState
@@ -148,6 +151,17 @@ fun MapScreen(
                 .padding(bottom = 20.dp)
         ) {
             Text(text = "Find me!")
+        }
+        Button(
+            onClick = {
+                AuthUI.getInstance()
+                    .signOut(context)
+                    .addOnCompleteListener {
+
+                    }
+            },
+        ) {
+            Text(text = "Log Out")
         }
         if (vm.location != null) {
             Button(
