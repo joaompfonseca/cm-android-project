@@ -1,18 +1,22 @@
 package cm.project.android.projectx.db.repositories
 
+import android.net.Uri
 import cm.project.android.projectx.db.entities.POI
 import cm.project.android.projectx.db.entities.Rating
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.tasks.await
+import java.io.File
 
-private const val BASE_URL =
+private const val DB_URL =
     "https://cm-android-project-39eba-default-rtdb.europe-west1.firebasedatabase.app/"
-
+private const val STORAGE_URL = "gs://cm-android-project-39eba.appspot.com"
 
 class POIRepository {
 
-    private val db = Firebase.database(BASE_URL).getReference("poi")
+    private val db = Firebase.database(DB_URL).getReference("poi")
+    private val storage = Firebase.storage(STORAGE_URL).getReference("poi")
 
     suspend fun initDB() {
         val poi1 = POI(
@@ -54,9 +58,9 @@ class POIRepository {
                 Rating("user", true)
             )
         )
-        savePOI(poi1)
-        savePOI(poi2)
-        savePOI(poi3)
+        savePOI(poi1, Uri.EMPTY)
+        savePOI(poi2, Uri.EMPTY)
+        savePOI(poi3, Uri.EMPTY)
     }
 
     suspend fun getAllPOIs(): List<POI> {
@@ -70,8 +74,11 @@ class POIRepository {
         return res
     }
 
-    suspend fun savePOI(poi: POI) {
+    suspend fun savePOI(poi: POI, imageUri: Uri) {
         val id = poi.hashCode().toString()
-        db.child(id).setValue(poi).await()
+        storage.child("$id.jpg").putFile(imageUri).await()
+        // Update picture url
+        val updatedPoi = poi.copy(pictureUrl = storage.child("$id.jpg").downloadUrl.await().toString())
+        db.child(id).setValue(updatedPoi).await()
     }
 }

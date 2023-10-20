@@ -6,7 +6,6 @@ import coil.compose.AsyncImage
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,7 +24,6 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -35,7 +33,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
-import androidx.core.content.FileProvider.getUriForFile
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cm.project.android.projectx.R
 import cm.project.android.projectx.db.entities.POI
@@ -219,17 +216,21 @@ fun AddPOIScreen(
         Spacer(modifier = Modifier.padding(4.dp))
 
         Button(onClick = {
+            if (imageUri == null) {
+                return@Button
+            }
             vm.addPOI(
                 POI(
                     name = name,
                     description = description,
                     type = type,
-                    pictureUrl = imageUri.toString(), // TODO: upload image to Firebase Storage
+                    pictureUrl = "",
                     latitude = vm.location!!.latitude,
                     longitude = vm.location!!.longitude,
                     createdBy = "user", // TODO: change to user id
                     ratings = mutableListOf()
-                )
+                ),
+                imageUri!!
             )
             onBack()
         }) {

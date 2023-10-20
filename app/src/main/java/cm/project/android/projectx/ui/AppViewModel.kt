@@ -3,14 +3,14 @@ package cm.project.android.projectx.ui
 import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
-import android.content.om.OverlayManager
 import android.net.Uri
 import android.os.Looper
 import android.util.Log
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.toMutableStateList
 import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -26,9 +26,6 @@ import com.google.android.gms.location.LocationServices.getFusedLocationProvider
 import com.google.android.gms.location.Priority
 import com.utsman.osmandcompose.CameraProperty
 import com.utsman.osmandcompose.CameraState
-import com.utsman.osmandcompose.MarkerState
-import com.utsman.osmandcompose.OverlayManagerState
-import com.utsman.osmandcompose.rememberOverlayManagerState
 import kotlinx.coroutines.launch
 import org.osmdroid.util.GeoPoint
 import java.util.concurrent.TimeUnit
@@ -44,7 +41,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
     val poiRepository = POIRepository()
 
-    var poiList by mutableStateOf(listOf<POI>())
+    var poiList by mutableStateOf<List<POI>>(emptyList())
         private set
 
     var camera by mutableStateOf(
@@ -172,9 +169,10 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun addPOI(poi: POI) {
+    fun addPOI(poi: POI, imageUri: Uri) {
         viewModelScope.launch {
-            poiRepository.savePOI(poi)
+            poiRepository.savePOI(poi, imageUri)
+            getPOIs()
         }
     }
 }

@@ -3,7 +3,6 @@
 package cm.project.android.projectx.ui
 
 import androidx.annotation.StringRes
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -13,7 +12,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -69,11 +67,13 @@ fun App(
         ) {
             composable(route = AppScreen.Map.name) {
                 MapScreen(
+                    vm = vm,
                     onAddPOI = { navController.navigate(AppScreen.AddPOI.name) },
                 )
             }
             composable(route = AppScreen.AddPOI.name) {
                 AddPOIScreen(
+                    vm = vm,
                     onBack = { navController.popBackStack(AppScreen.Map.name, inclusive = false) },
                 )
             }

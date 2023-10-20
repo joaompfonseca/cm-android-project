@@ -1,5 +1,7 @@
 package cm.project.android.projectx.ui.screens
 
+import android.util.Log
+import coil.compose.AsyncImage
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,20 +17,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SearchBar
-import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,8 +40,6 @@ import com.utsman.osmandcompose.Marker
 import com.utsman.osmandcompose.MarkerState
 import com.utsman.osmandcompose.OpenStreetMap
 import com.utsman.osmandcompose.ZoomButtonVisibility
-import com.utsman.osmandcompose.rememberOverlayManagerState
-import kotlinx.coroutines.launch
 import org.osmdroid.tileprovider.tilesource.ITileSource
 import org.osmdroid.tileprovider.tilesource.XYTileSource
 import org.osmdroid.util.GeoPoint
@@ -99,6 +93,7 @@ fun MapScreen(
 
             }
         ) {
+            Log.i("POI", vm.poiList.size.toString())
             vm.poiList.forEach { poi ->
                 Marker(
                     state = MarkerState(
@@ -112,6 +107,7 @@ fun MapScreen(
                             .background(color = Color.Gray, shape = RoundedCornerShape(12.dp))
                     ) {
                         Text(text = it.title)
+                        AsyncImage(model = poi.pictureUrl, contentDescription = "POI Image")
                     }
                 }
             }

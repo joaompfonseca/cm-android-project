@@ -64,6 +64,9 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.5.3")
     implementation("io.coil-kt:coil-compose:2.4.0")
 
+    // Coil
+    implementation("io.coil-kt:coil:1.1.1")
+
     // OSM
     implementation("org.osmdroid:osmdroid-android:6.1.16")
     implementation("tech.utsmankece:osm-android-compose:0.0.5")
@@ -79,5 +82,7 @@ dependencies {
     // Import the BoM for the Firebase platform
     implementation(platform("com.google.firebase:firebase-bom:32.3.1"))
     implementation("com.google.firebase:firebase-database-ktx")
+    implementation("com.google.firebase:firebase-storage-ktx")
+
     implementation("com.google.android.gms:play-services-location:21.0.1")
 }
