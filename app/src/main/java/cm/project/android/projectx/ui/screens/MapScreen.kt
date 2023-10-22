@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -19,8 +21,10 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
@@ -31,12 +35,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cm.project.android.projectx.MainActivity
 import cm.project.android.projectx.R
+import cm.project.android.projectx.db.entities.POI
+import cm.project.android.projectx.db.entities.Rating
 import cm.project.android.projectx.ui.AppViewModel
 import coil.compose.AsyncImage
 import com.firebase.ui.auth.AuthUI
@@ -83,44 +92,41 @@ fun MapScreen(
     }
 
     Box(modifier = modifier.fillMaxSize()) {
-        OpenStreetMap(
-            modifier = Modifier.fillMaxSize(),
-            cameraState = vm.camera,
-            properties = mapProperties,
-            onMapClick = {
-                println("on click  -> $it")
-            },
-            onMapLongClick = {
-                println("on long click -> ${it.latitude}, ${it.longitude}")
+        if (vm.camera != null) {
+            OpenStreetMap(
+                modifier = Modifier.fillMaxSize(),
+                cameraState = vm.camera!!,
+                properties = mapProperties,
+                onMapClick = {
+                    println("on click  -> $it")
+                },
+                onMapLongClick = {
+                    println("on long click -> ${it.latitude}, ${it.longitude}")
 
-            },
-            onFirstLoadListener = {
+                },
+                onFirstLoadListener = {
 
-            }
-        ) {
-            vm.poiList.forEach { poi ->
-                Marker(
-                    state = MarkerState(
-                        geoPoint = GeoPoint(poi.latitude, poi.longitude)
-                    ),
-                    title = poi.name
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .size(100.dp)
-                            .background(color = Color.Gray, shape = RoundedCornerShape(12.dp))
-                    ) {
-                        Text(text = it.title)
-                        AsyncImage(model = poi.pictureUrl, contentDescription = "POI Image")
-                    }
                 }
-            }
-            Marker(
-                icon = LocalContext.current.getDrawable(R.drawable.user_location),
-                state = MarkerState(
-                    geoPoint = vm.location ?: GeoPoint(0.0, 0.0)
+            ) {
+                vm.poiList.forEach { poi ->
+                    Marker(
+                        state = MarkerState(
+                            geoPoint = GeoPoint(poi.latitude, poi.longitude)
+                        ),
+                        title = poi.name,
+                        onClick = { _ ->
+                            vm.showDetails(poi)
+                            return@Marker true
+                        }
+                    )
+                }
+                Marker(
+                    icon = LocalContext.current.getDrawable(R.drawable.user_location),
+                    state = MarkerState(
+                        geoPoint = vm.location ?: GeoPoint(0.0, 0.0)
+                    )
                 )
-            )
+            }
         }
         if (!vm.route) {
             SearchBar(
@@ -178,23 +184,43 @@ fun MapScreen(
                 Text(text = "Add POI")
             }
         }
+        //
+        // POI Details
+        //
+        if (vm.showDetails) {
+            ModalBottomSheet(
+                onDismissRequest = { vm.hideDetails() },
+                sheetState = rememberModalBottomSheetState()
+            ) {
+                POIDetails(
+                    poi = vm.selectedPOI!!,
+                    ratePOI = { value ->
+                        vm.ratePOI(vm.selectedPOI!!, Rating(vm.user!!.uid, value))
+                    }
+                )
+            }
+        }
     }
 }
 
 @Composable
 fun OriginDestination(
     routing: (String) -> Unit
-){
+) {
     var dest by remember { mutableStateOf("") }
-    Column(modifier = Modifier
-        .padding(20.dp)
-        .background(color = Color.White, shape = RoundedCornerShape(12.dp))) {
+    Column(
+        modifier = Modifier
+            .padding(20.dp)
+            .background(color = Color.White, shape = RoundedCornerShape(12.dp))
+    ) {
         Row(modifier = Modifier) {
             Text(text = " Origin:         ", modifier = Modifier.padding(top = 20.dp))
-            TextField(value = "Current Location",
+            TextField(
+                value = "Current Location",
                 onValueChange = { },
                 readOnly = true,
-                modifier = Modifier.width(200.dp))
+                modifier = Modifier.width(200.dp)
+            )
         }
         Row {
             Text(text = " Destination:", modifier = Modifier.padding(top = 20.dp))
@@ -211,7 +237,7 @@ fun OriginDestination(
                     imeAction = ImeAction.Search
                 ),
                 modifier = Modifier.width(200.dp)
-                )
+            )
         }
     }
 }
@@ -236,6 +262,96 @@ fun SearchBar(
         ),
         modifier = modifier
     )
+}
+
+@Composable
+fun POIDetails(
+    poi: POI,
+    ratePOI: (Boolean) -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .padding(20.dp)
+            .fillMaxSize()
+    ) {
+        Text(
+            text = poi.name,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Text(
+            text = poi.type,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Row(
+            modifier = Modifier
+                .padding(top = 20.dp)
+                .fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 20.dp)
+            ) {
+                Text(
+                    text = poi.description
+                )
+                Text(
+                    text = "Added by: ${poi.createdBy}",
+                    modifier = Modifier
+                        .padding(top = 20.dp)
+                )
+            }
+            Column {
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .width(175.dp)
+                        .height(200.dp)
+                ) {
+                    if (poi.pictureUrl == "") {
+                        Text(
+                            text = "No image available",
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxSize()
+                        )
+                    } else {
+                        AsyncImage(
+                            model = poi.pictureUrl,
+                            contentDescription = "POI Image",
+                            modifier = Modifier
+                                .fillMaxSize()
+                        )
+                    }
+                }
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                ) {
+                    Button(
+                        onClick = {
+                            ratePOI(true)
+                        },
+                    ) {
+                        Text(text = "\uD83D\uDC4D")
+                    }
+                    Text(text = "${poi.ratings.filter { it.value }.size}")
+                    Button(
+                        onClick = {
+                            ratePOI(false)
+                        }
+                    ) {
+                        Text(text = "\uD83D\uDC4E")
+                    }
+                    Text(text = "${poi.ratings.filter { !it.value }.size}")
+                }
+            }
+        }
+    }
 }
 
 private fun restartApp(context: Context) {

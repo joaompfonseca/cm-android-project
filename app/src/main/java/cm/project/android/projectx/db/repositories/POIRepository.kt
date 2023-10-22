@@ -82,4 +82,9 @@ class POIRepository {
         db.child(id).setValue(updatedPoi).await()
         return updatedPoi
     }
+
+    suspend fun updatePOI(poi: POI) {
+        val id = poi.hashCode().toString()
+        db.child(id).setValue(poi).await()
+    }
 }

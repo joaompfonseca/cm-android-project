@@ -79,6 +79,10 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun setupAuth() {
+        if (FirebaseAuth.getInstance().currentUser != null) {
+            return
+        }
+
         val signInLauncher = registerForActivityResult(
             FirebaseAuthUIActivityResultContract(),
         ) { result ->

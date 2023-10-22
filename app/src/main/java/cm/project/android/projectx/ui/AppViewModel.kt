@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import cm.project.android.projectx.db.entities.POI
+import cm.project.android.projectx.db.entities.Rating
 import cm.project.android.projectx.db.repositories.POIRepository
 import cm.project.android.projectx.network.AppApi
 import cm.project.android.projectx.network.entities.GeocodeDto
@@ -24,6 +25,8 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices.getFusedLocationProviderClient
 import com.google.android.gms.location.Priority
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.ktx.Firebase
 import com.utsman.osmandcompose.CameraProperty
 import com.utsman.osmandcompose.CameraState
 import kotlinx.coroutines.launch
@@ -41,23 +44,24 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
     val poiRepository = POIRepository()
 
+    val user = FirebaseAuth.getInstance().currentUser
+
     var poiList by mutableStateOf<List<POI>>(emptyList())
         private set
 
-    var camera by mutableStateOf(
-        CameraState(
-            CameraProperty(
-                geoPoint = GeoPoint(40.64427, -8.64554),
-                zoom = 14.0
-            )
-        )
-    )
+    var camera by mutableStateOf<CameraState?>(null)
         private set
 
     var location by mutableStateOf<GeoPoint?>(null)
         private set
 
     var route by mutableStateOf(false)
+
+    var showDetails by mutableStateOf(false)
+        private set
+
+    var selectedPOI by mutableStateOf<POI?>(null)
+        private set
 
     init {
 
@@ -101,6 +105,15 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         getPOIs()
     }
 
+    fun setCamera(latitude: Double, longitude: Double, zoom: Double) {
+        camera = CameraState(
+            CameraProperty(
+                geoPoint = GeoPoint(latitude, longitude),
+                zoom = zoom
+            )
+        )
+    }
+
     fun getPOIs() {
         viewModelScope.launch {
             poiList = poiRepository.getAllPOIs()
@@ -110,12 +123,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     fun gotoUserLocation() {
         viewModelScope.launch {
             if (location != null) {
-                camera = CameraState(
-                    CameraProperty(
-                        geoPoint = location as GeoPoint,
-                        zoom = 18.0
-                    )
-                )
+                setCamera(location!!.latitude, location!!.longitude, 18.0)
             }
         }
     }
@@ -130,22 +138,17 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                 res = AppApi.revGeocodeService.getRevGeocode(query)
             } else {
                 Log.e("AppViewModel", "Geocoding")
-                res =  AppApi.geocodeService.getGeocode(query)
+                res = AppApi.geocodeService.getGeocode(query)
             }
             // Consider only the first result
             if (res["items"]?.isNotEmpty() == true) {
                 val item = res["items"]!![0]
-                camera = CameraState(
-                    CameraProperty(
-                        geoPoint = GeoPoint(item.position.lat, item.position.lng),
-                        zoom = 14.0
-                    )
-                )
+                setCamera(item.position.lat, item.position.lng, 14.0)
             }
         }
     }
 
-    fun getRoute(query: String, context: Context){
+    fun getRoute(query: String, context: Context) {
         viewModelScope.launch {
             Log.e("AppViewModel", "Query: $query")
             var res: HashMap<String, List<GeocodeDto>>? = null
@@ -155,14 +158,15 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                 res = AppApi.revGeocodeService.getRevGeocode(query)
             } else {
                 Log.e("AppViewModel", "Geocoding")
-                res =  AppApi.geocodeService.getGeocode(query)
+                res = AppApi.geocodeService.getGeocode(query)
             }
             // Consider only the first result
             if (res["items"]?.isNotEmpty() == true) {
                 val lat = res["items"]!![0].position.lat
                 val lng = res["items"]!![0].position.lng
                 val gmmIntentUri = Uri.parse("google.navigation:q=$lat,$lng&mode=b")
-                val mapIntent = android.content.Intent(android.content.Intent.ACTION_VIEW, gmmIntentUri)
+                val mapIntent =
+                    android.content.Intent(android.content.Intent.ACTION_VIEW, gmmIntentUri)
                 mapIntent.setPackage("com.google.android.apps.maps")
                 startActivity(context, mapIntent, null)
             }
@@ -173,6 +177,37 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             val savedPOI = poiRepository.savePOI(poi, imageUri)
             poiList = poiList.toMutableList().apply { add(savedPOI) }
+        }
+    }
+
+    fun ratePOI(poi: POI, rating: Rating) {
+        viewModelScope.launch {
+            val ratings = poi.ratings.toMutableList()
+            ratings.removeIf({ it.user == rating.user })
+            ratings.add(rating)
+            val ratedPOI = poi.copy(ratings = ratings)
+            poiRepository.updatePOI(ratedPOI)
+
+            poiList = poiList.indexOf(poi).let {
+                poiList.toMutableList().apply { set(it, ratedPOI) }
+            }
+            if (poi.hashCode() == selectedPOI?.hashCode()) {
+                selectedPOI = ratedPOI
+            }
+        }
+    }
+
+    fun showDetails(poi: POI) {
+        viewModelScope.launch {
+            selectedPOI = poi
+            showDetails = true
+            setCamera(poi.latitude - 0.0005, poi.longitude, 18.0)
+        }
+    }
+
+    fun hideDetails() {
+        viewModelScope.launch {
+            showDetails = false
         }
     }
 }

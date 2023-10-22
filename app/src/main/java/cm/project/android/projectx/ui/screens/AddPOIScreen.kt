@@ -230,7 +230,7 @@ fun AddPOIScreen(
                     pictureUrl = "",
                     latitude = vm.location!!.latitude,
                     longitude = vm.location!!.longitude,
-                    createdBy = FirebaseAuth.getInstance().currentUser!!.uid,
+                    createdBy = vm.user!!.uid,
                     ratings = mutableListOf()
                 ),
                 imageUri!!
