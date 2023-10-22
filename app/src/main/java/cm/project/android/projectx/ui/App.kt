@@ -29,6 +29,7 @@ import androidx.navigation.compose.rememberNavController
 import cm.project.android.projectx.R
 import cm.project.android.projectx.ui.screens.AddPOIScreen
 import cm.project.android.projectx.ui.screens.MapScreen
+import com.google.firebase.auth.FirebaseAuth
 
 enum class AppScreen(@StringRes val title: Int) {
     Map(title = R.string.map_screen),
@@ -58,7 +59,7 @@ fun App(
                 navigateUp = { navController.navigateUp() }
             )
         }
-    ) {innerPadding ->
+    ) { innerPadding ->
 
         NavHost(
             navController = navController,

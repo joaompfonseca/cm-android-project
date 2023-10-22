@@ -74,11 +74,12 @@ class POIRepository {
         return res
     }
 
-    suspend fun savePOI(poi: POI, imageUri: Uri) {
+    suspend fun savePOI(poi: POI, imageUri: Uri): POI {
         val id = poi.hashCode().toString()
         storage.child("$id.jpg").putFile(imageUri).await()
         // Update picture url
         val updatedPoi = poi.copy(pictureUrl = storage.child("$id.jpg").downloadUrl.await().toString())
         db.child(id).setValue(updatedPoi).await()
+        return updatedPoi
     }
 }

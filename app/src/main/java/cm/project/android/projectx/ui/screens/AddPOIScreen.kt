@@ -37,6 +37,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import cm.project.android.projectx.R
 import cm.project.android.projectx.db.entities.POI
 import cm.project.android.projectx.ui.AppViewModel
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -216,7 +219,7 @@ fun AddPOIScreen(
         Spacer(modifier = Modifier.padding(4.dp))
 
         Button(onClick = {
-            if (imageUri == null) {
+            if (name == "" || description == "" || type == "" || imageUri == null) {
                 return@Button
             }
             vm.addPOI(
@@ -227,7 +230,7 @@ fun AddPOIScreen(
                     pictureUrl = "",
                     latitude = vm.location!!.latitude,
                     longitude = vm.location!!.longitude,
-                    createdBy = "user", // TODO: change to user id
+                    createdBy = FirebaseAuth.getInstance().currentUser!!.uid,
                     ratings = mutableListOf()
                 ),
                 imageUri!!

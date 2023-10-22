@@ -171,8 +171,8 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
     fun addPOI(poi: POI, imageUri: Uri) {
         viewModelScope.launch {
-            poiRepository.savePOI(poi, imageUri)
-            getPOIs()
+            val savedPOI = poiRepository.savePOI(poi, imageUri)
+            poiList = poiList.toMutableList().apply { add(savedPOI) }
         }
     }
 }

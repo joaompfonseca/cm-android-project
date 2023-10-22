@@ -96,7 +96,6 @@ fun MapScreen(
 
             }
         ) {
-            Log.i("POI", vm.poiList.size.toString())
             vm.poiList.forEach { poi ->
                 Marker(
                     state = MarkerState(

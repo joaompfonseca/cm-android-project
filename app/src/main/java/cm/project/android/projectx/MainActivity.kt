@@ -19,49 +19,46 @@ import cm.project.android.projectx.ui.App
 import cm.project.android.projectx.ui.theme.ProjectXTheme
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
-import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 import org.osmdroid.config.Configuration
 
 
 class MainActivity : ComponentActivity() {
 
-    private lateinit var auth: FirebaseAuth
-
-    private val signInLauncher = registerForActivityResult(
-        FirebaseAuthUIActivityResultContract(),
-    ) { res ->
-        this.onSignInResult(res)
-    }
-
-    private fun onSignInResult(result: FirebaseAuthUIAuthenticationResult) {
-        val response = result.idpResponse
-        if (result.resultCode == RESULT_OK) {
-            // Successfully signed in
-            val user = FirebaseAuth.getInstance().currentUser
-            Log.i("MainActivity", "User: $user")
-            // ...
-        } else {
-            Log.i("MainActivity", "Error: ${response?.error?.errorCode}")
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        setupApp()
+        setupAuth()
+
+        setContent {
+            ProjectXTheme {
+                // A surface container using the 'background' color from the theme
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    App()
+                }
+            }
+        }
+    }
+
+    private fun setupApp() {
         FirebaseApp.initializeApp(this)
 
+        // Allow network on main thread
         val policy = ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
 
+        // Load configuration
         Configuration.getInstance().load(
             applicationContext,
             PreferenceManager.getDefaultSharedPreferences(applicationContext)
         )
 
+        // Request permissions
         if (ActivityCompat.checkSelfPermission(
                 application.applicationContext,
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -79,8 +76,21 @@ class MainActivity : ComponentActivity() {
                 101
             )
         }
+    }
 
-        auth = Firebase.auth
+    private fun setupAuth() {
+        val signInLauncher = registerForActivityResult(
+            FirebaseAuthUIActivityResultContract(),
+        ) { result ->
+            val response = result.idpResponse
+            if (result.resultCode == RESULT_OK) {
+                // Successfully signed in
+                val user = FirebaseAuth.getInstance().currentUser!!
+                Log.i("Authentication", "Signed in as ${user.displayName}, ${user.email} (uid=${user.uid}) ")
+            } else {
+                Log.e("Authentication", "Error signing in: ${response?.error?.errorCode}")
+            }
+        }
 
         // Choose authentication providers
         val providers = arrayListOf(
@@ -93,18 +103,5 @@ class MainActivity : ComponentActivity() {
             .setAvailableProviders(providers)
             .build()
         signInLauncher.launch(signInIntent)
-
-        setContent {
-            ProjectXTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    App()
-                }
-            }
-        }
     }
-
 }
