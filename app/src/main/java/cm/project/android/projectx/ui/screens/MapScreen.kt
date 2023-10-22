@@ -1,8 +1,8 @@
 package cm.project.android.projectx.ui.screens
 
-import android.app.Application
+import android.content.Context
+import android.content.Intent
 import android.util.Log
-import coil.compose.AsyncImage
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,7 +19,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -34,9 +33,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.viewmodel.compose.viewModel
+import cm.project.android.projectx.MainActivity
 import cm.project.android.projectx.R
 import cm.project.android.projectx.ui.AppViewModel
+import coil.compose.AsyncImage
 import com.firebase.ui.auth.AuthUI
 import com.utsman.osmandcompose.MapProperties
 import com.utsman.osmandcompose.Marker
@@ -156,7 +158,8 @@ fun MapScreen(
                 AuthUI.getInstance()
                     .signOut(context)
                     .addOnCompleteListener {
-
+                        Log.d("Authentication", "User logged out")
+                        restartApp(context)
                     }
             },
         ) {
@@ -233,4 +236,10 @@ fun SearchBar(
         ),
         modifier = modifier
     )
+}
+
+private fun restartApp(context: Context) {
+    val intent = Intent(context, MainActivity::class.java)
+    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+    startActivity(context, intent, null)
 }
