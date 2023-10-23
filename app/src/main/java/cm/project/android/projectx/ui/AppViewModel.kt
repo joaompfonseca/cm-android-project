@@ -74,9 +74,9 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         fusedLocationProviderClient = getFusedLocationProviderClient(application.applicationContext)
         // Requirements for the location updates
         locationRequest = LocationRequest
-            .Builder(Priority.PRIORITY_HIGH_ACCURACY, TimeUnit.SECONDS.toMillis(10))
-            .setMinUpdateIntervalMillis(TimeUnit.SECONDS.toMillis(5))
-            .setMaxUpdateDelayMillis(TimeUnit.MINUTES.toMillis(2))
+            .Builder(Priority.PRIORITY_HIGH_ACCURACY, TimeUnit.SECONDS.toMillis(1))
+            .setMinUpdateIntervalMillis(TimeUnit.SECONDS.toMillis(1))
+            .setMaxUpdateDelayMillis(TimeUnit.SECONDS.toMillis(5))
             .build()
         // Called when FusedLocationProviderClient has a new Location
         locationCallback = object : LocationCallback() {
