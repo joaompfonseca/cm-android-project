@@ -3,24 +3,44 @@ package cm.project.android.projectx.ui.screens
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.ExitToApp
+import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.Send
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LargeFloatingActionButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -33,13 +53,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cm.project.android.projectx.MainActivity
@@ -128,60 +151,132 @@ fun MapScreen(
                 )
             }
         }
-        if (!vm.route) {
-            SearchBar(
-                search = { vm.getSearch(it) },
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(top = 20.dp)
-                    .width(200.dp)
-                    .size(50.dp)
-            )
-        }
-        Button(
-            onClick = { vm.route = !vm.route },
+        Row(
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.Top,
             modifier = Modifier
-                .align(Alignment.BottomStart)
-                .padding(bottom = 20.dp)
+                .align(Alignment.TopCenter)
+                .padding(20.dp)
+                .fillMaxWidth()
         ) {
-            Text(text = "Route")
-        }
-        if (vm.route) {
-            OriginDestination(
-                routing = { vm.getRoute(it, context) }
+            Column {
+                //
+                // Profile Page
+                //
+                FloatingActionButton(
+                    onClick = { }, // TODO: Go to profile page
+                    contentColor = Color.DarkGray,
+                    containerColor = Color.Gray,
+                    modifier = Modifier
+                        .padding(bottom = 20.dp, end = 20.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Person,
+                        contentDescription = "Profile",
+                        modifier = Modifier.size(30.dp)
+                    )
+                }
+                //
+                // Logout
+                //
+                FloatingActionButton(
+                    onClick = { logout(context) },
+                    contentColor = Color.DarkGray,
+                    containerColor = Color.LightGray,
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.ExitToApp,
+                            contentDescription = "Logout",
+                            modifier = Modifier.size(30.dp)
+                        )
+                        Text("Logout")
+                    }
+                }
+            }
+            //
+            // Search Bar
+            //
+            SearchBar(
+                search = { vm.gotoSearch(it) },
+                modifier = Modifier
+                    .fillMaxWidth()
             )
         }
-        Button(
-            onClick = { vm.gotoUserLocation() },
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 20.dp)
+                .padding(20.dp)
+                .fillMaxWidth()
         ) {
-            Text(text = "Find me!")
-        }
-        Button(
-            onClick = {
-                AuthUI.getInstance()
-                    .signOut(context)
-                    .addOnCompleteListener {
-                        Log.d("Authentication", "User logged out")
-                        restartApp(context)
-                    }
-            },
-        ) {
-            Text(text = "Log Out")
-        }
-        if (vm.location != null) {
-            Button(
+            //
+            // Add POI
+            //
+            ExtendedFloatingActionButton(
                 onClick = {
-                    onAddPOI()
+                    if (vm.location != null) {
+                        onAddPOI()
+                    } else {
+                        Toast.makeText(context, "Please enable location", Toast.LENGTH_SHORT).show()
+                    }
                 },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Rounded.Add,
+                        contentDescription = "Add POI"
+                    )
+                },
+                text = { Text("POI") }
+            )
+            //
+            // Find User
+            //
+            LargeFloatingActionButton(
+                onClick = { vm.gotoUserLocation() },
+                shape = CircleShape,
                 modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(bottom = 20.dp)
             ) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = "Add POI")
-                Text(text = "Add POI")
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.LocationOn,
+                        contentDescription = "Find me!",
+                        modifier = Modifier.size(30.dp)
+                    )
+                    Text("Find me!")
+                }
+            }
+            //
+            // Create Route
+            //
+            ExtendedFloatingActionButton(
+                onClick = { vm.showRoute() },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Rounded.Send,
+                        contentDescription = "Go to location",
+                        modifier = Modifier
+                            .rotate(-45f)
+                            .padding(bottom = 5.dp)
+                    )
+                },
+                text = { Text("GO") }
+            )
+        }
+        //
+        // Create a Route
+        //
+        if (vm.showRoute) {
+            Dialog(onDismissRequest = { vm.hideRoute() }) {
+                OriginDestination(
+                    onDismissRequest = { vm.hideRoute() },
+                    routing = { vm.gotoRoute(it, context) }
+                )
             }
         }
         //
@@ -205,39 +300,91 @@ fun MapScreen(
 
 @Composable
 fun OriginDestination(
-    routing: (String) -> Unit
+    onDismissRequest: () -> Unit,
+    routing: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     var dest by remember { mutableStateOf("") }
-    Column(
-        modifier = Modifier
-            .padding(20.dp)
-            .background(color = Color.White, shape = RoundedCornerShape(12.dp))
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondary
+        ),
+        modifier = modifier
     ) {
-        Row(modifier = Modifier) {
-            Text(text = " Origin:         ", modifier = Modifier.padding(top = 20.dp))
-            TextField(
-                value = "Current Location",
-                onValueChange = { },
-                readOnly = true,
-                modifier = Modifier.width(200.dp)
-            )
-        }
-        Row {
-            Text(text = " Destination:", modifier = Modifier.padding(top = 20.dp))
-            TextField(
-                value = dest,
-                onValueChange = { dest = it },
-                label = { Text("Destination") },
-                keyboardActions = KeyboardActions(
-                    onSearch = {
-                        routing(dest)
-                    }
-                ),
-                keyboardOptions = KeyboardOptions(
-                    imeAction = ImeAction.Search
-                ),
-                modifier = Modifier.width(200.dp)
-            )
+        Column(
+            modifier = Modifier
+                .padding(20.dp)
+                .fillMaxWidth()
+        ) {
+            Row (
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    text = "Where to go?",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                )
+                FloatingActionButton(
+                    onClick = onDismissRequest,
+                    contentColor = Color.DarkGray,
+                    containerColor = Color.Gray,
+                    modifier = Modifier
+                        .size(30.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Close,
+                        contentDescription = "Close"
+                    )
+                }
+            }
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .padding(top = 20.dp)
+                    .fillMaxWidth()
+            ) {
+                Text("Origin: ")
+                Text(
+                    text = "Current Location",
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .padding(top = 20.dp)
+                    .fillMaxWidth()
+            ) {
+                TextField(
+                    value = dest,
+                    onValueChange = { dest = it },
+                    placeholder = { Text("Destination") },
+                    keyboardActions = KeyboardActions(
+                        onSearch = {
+                            routing(dest)
+                        }
+                    ),
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Search
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                )
+                FloatingActionButton(
+                    onClick = { routing(dest) }
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Send,
+                        contentDescription = "Go"
+                    )
+                }
+            }
         }
     }
 }
@@ -248,20 +395,37 @@ fun SearchBar(
     modifier: Modifier = Modifier
 ) {
     var query by remember { mutableStateOf("") }
-    TextField(
-        value = query,
-        onValueChange = { query = it },
-        label = { Text("Search") },
-        keyboardActions = KeyboardActions(
-            onSearch = {
-                search(query)
-            }
-        ),
-        keyboardOptions = KeyboardOptions(
-            imeAction = ImeAction.Search
-        ),
+    Row(
         modifier = modifier
-    )
+    ) {
+        TextField(
+            value = query,
+            onValueChange = { query = it },
+            placeholder = { Text("Search") },
+            keyboardActions = KeyboardActions(
+                onSearch = {
+                    search(query)
+                }
+            ),
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Search
+            ),
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier
+                .weight(1f)
+        )
+        FloatingActionButton(
+            onClick = { search(query) },
+            contentColor = Color.DarkGray,
+            containerColor = Color.Gray,
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.Search,
+                contentDescription = "Search",
+                modifier = Modifier.size(30.dp)
+            )
+        }
+    }
 }
 
 @Composable
@@ -352,6 +516,15 @@ fun POIDetails(
             }
         }
     }
+}
+
+private fun logout(context: Context) {
+    AuthUI.getInstance()
+        .signOut(context)
+        .addOnCompleteListener {
+            Log.i("Authentication", "User logged out")
+            restartApp(context)
+        }
 }
 
 private fun restartApp(context: Context) {

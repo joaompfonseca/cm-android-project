@@ -55,7 +55,8 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     var location by mutableStateOf<GeoPoint?>(null)
         private set
 
-    var route by mutableStateOf(false)
+    var showRoute by mutableStateOf(false)
+        private set
 
     var showDetails by mutableStateOf(false)
         private set
@@ -128,28 +129,42 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun getSearch(query: String) {
+    fun gotoSearch(query: String) {
         viewModelScope.launch {
+            if (query.isEmpty()) {
+                return@launch
+            }
             Log.e("AppViewModel", "Query: $query")
             var res: HashMap<String, List<GeocodeDto>>? = null
             val isMatch = Regex("^(-?\\d+(\\.\\d+)?),\\s*(-?\\d+(\\.\\d+)?)\$").matches(query)
             if (isMatch) {
                 Log.e("AppViewModel", "Reverse geocoding")
-                res = AppApi.revGeocodeService.getRevGeocode(query)
+                try {
+                    res = AppApi.revGeocodeService.getRevGeocode(query)
+                } catch (e: Exception) {
+                    Log.e("AppViewModel", "Error: ${e.message}")
+                }
             } else {
                 Log.e("AppViewModel", "Geocoding")
-                res = AppApi.geocodeService.getGeocode(query)
+                try {
+                    res = AppApi.geocodeService.getGeocode(query)
+                } catch (e: Exception) {
+                    Log.e("AppViewModel", "Error: ${e.message}")
+                }
             }
             // Consider only the first result
-            if (res["items"]?.isNotEmpty() == true) {
+            if (res != null && res["items"]?.isNotEmpty() == true) {
                 val item = res["items"]!![0]
                 setCamera(item.position.lat, item.position.lng, 14.0)
             }
         }
     }
 
-    fun getRoute(query: String, context: Context) {
+    fun gotoRoute(query: String, context: Context) {
         viewModelScope.launch {
+            if (query.isEmpty()) {
+                return@launch
+            }
             Log.e("AppViewModel", "Query: $query")
             var res: HashMap<String, List<GeocodeDto>>? = null
             val isMatch = Regex("^(-?\\d+(\\.\\d+)?),\\s*(-?\\d+(\\.\\d+)?)\$").matches(query)
@@ -197,6 +212,18 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun showRoute() {
+        viewModelScope.launch {
+            showRoute = true
+        }
+    }
+
+    fun hideRoute() {
+        viewModelScope.launch {
+            showRoute = false
+        }
+    }
+
     fun showDetails(poi: POI) {
         viewModelScope.launch {
             selectedPOI = poi
@@ -208,6 +235,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     fun hideDetails() {
         viewModelScope.launch {
             showDetails = false
+            setCamera(selectedPOI!!.latitude, selectedPOI!!.longitude, 18.0)
         }
     }
 }

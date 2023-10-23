@@ -6,7 +6,7 @@
     <string name="profile_screen">My Profile</string>
     <string name="back_button">Back</string>
     <string name="poi_name">Name</string>
-    <string name="add_poi_title">Add a Point of Interest</string>
+    <string name="add_poi_title">Add a POI</string>
     <string name="poi_description">Description</string>
     <string name="poi_type">Type</string>
     <string name="poi_picture">Picture</string>
