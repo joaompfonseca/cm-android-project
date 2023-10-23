@@ -63,7 +63,7 @@ fun AddPOIScreen(
 
     var description by rememberSaveable { mutableStateOf("") }
 
-    val typeList = arrayOf("parking", "fountain", "bathroom", "bench")
+    val typeList = arrayOf("bicycle-parking", "bicycle-shop", "drinking-water", "toilets", "bench")
     var isExpanded by rememberSaveable { mutableStateOf(false) }
     var type by rememberSaveable { mutableStateOf("") }
 
