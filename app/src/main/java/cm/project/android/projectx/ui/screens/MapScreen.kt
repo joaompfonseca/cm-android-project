@@ -4,7 +4,9 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,6 +34,8 @@ import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Send
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
@@ -53,6 +57,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -289,6 +294,7 @@ fun MapScreen(
             ) {
                 POIDetails(
                     poi = vm.selectedPOI!!,
+                    uid = vm.user!!.uid,
                     ratePOI = { value ->
                         vm.ratePOI(vm.selectedPOI!!, Rating(vm.user!!.uid, value))
                     }
@@ -317,7 +323,7 @@ fun OriginDestination(
                 .padding(20.dp)
                 .fillMaxWidth()
         ) {
-            Row (
+            Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
@@ -431,6 +437,7 @@ fun SearchBar(
 @Composable
 fun POIDetails(
     poi: POI,
+    uid: String,
     ratePOI: (Boolean) -> Unit,
 ) {
     Column(
@@ -471,8 +478,8 @@ fun POIDetails(
             }
             Column {
                 Row(
+                    horizontalArrangement = Arrangement.Center,
                     modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
                         .width(175.dp)
                         .height(200.dp)
                 ) {
@@ -488,30 +495,41 @@ fun POIDetails(
                             model = poi.pictureUrl,
                             contentDescription = "POI Image",
                             modifier = Modifier
-                                .fillMaxSize()
+                                .clip(RoundedCornerShape(20.dp))
                         )
                     }
                 }
                 Row(
+                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
                 ) {
                     Button(
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Green.copy(alpha = 0.5f),
+                            disabledContainerColor = Color.Green.copy(alpha = 0.2f)
+                        ),
+                        enabled = poi.ratings.none { it.user == uid && it.value },
                         onClick = {
                             ratePOI(true)
-                        },
+                        }
                     ) {
                         Text(text = "\uD83D\uDC4D")
+                        Text(text = "${poi.ratings.filter { it.value }.size}")
                     }
-                    Text(text = "${poi.ratings.filter { it.value }.size}")
                     Button(
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Red.copy(alpha = 0.5f),
+                            disabledContainerColor = Color.Red.copy(alpha = 0.2f)
+                        ),
+                        enabled = poi.ratings.none { it.user == uid && !it.value },
                         onClick = {
                             ratePOI(false)
                         }
                     ) {
                         Text(text = "\uD83D\uDC4E")
+                        Text(text = "${poi.ratings.filter { !it.value }.size}")
                     }
-                    Text(text = "${poi.ratings.filter { !it.value }.size}")
                 }
             }
         }
