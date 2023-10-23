@@ -49,6 +49,7 @@ import cm.project.android.projectx.ui.AppViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import org.osmdroid.util.GeoPoint
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -64,7 +65,7 @@ fun AddPOIScreen(
 
     val typeList = arrayOf("parking", "fountain", "bathroom", "bench")
     var isExpanded by rememberSaveable { mutableStateOf(false) }
-    var type by rememberSaveable { mutableStateOf(typeList[0]) }
+    var type by rememberSaveable { mutableStateOf("") }
 
     var hasImage by rememberSaveable { mutableStateOf(false) }
     var imageUri by rememberSaveable { mutableStateOf<Uri?>(null) }
@@ -81,6 +82,8 @@ fun AddPOIScreen(
             hasImage = success
         }
     )
+
+    val location = GeoPoint(vm.location!!.latitude, vm.location!!.longitude)
 
     val context = LocalContext.current
 
@@ -151,9 +154,9 @@ fun AddPOIScreen(
             }
         ) {
             TextField(
-                value = "",
+                value = type,
                 placeholder = { Text(text = "e.g. Fountain") },
-                onValueChange = {},
+                onValueChange = { },
                 readOnly = true,
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) },
                 modifier = Modifier
@@ -254,8 +257,8 @@ fun AddPOIScreen(
                         description = description,
                         type = type,
                         pictureUrl = "",
-                        latitude = vm.location!!.latitude,
-                        longitude = vm.location!!.longitude,
+                        latitude = location.latitude,
+                        longitude = location.longitude,
                         createdBy = vm.user!!.uid,
                         ratings = mutableListOf()
                     ),
