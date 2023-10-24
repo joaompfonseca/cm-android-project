@@ -151,7 +151,11 @@ fun MapScreen(
             if (vm.location != null) {
                 Marker(
                     icon = context.getDrawable(R.drawable.user_location),
-                    state = MarkerState(geoPoint = vm.location!!)
+                    state = MarkerState(geoPoint = vm.location!!),
+                    onClick = { _ ->
+                        vm.gotoUserLocation()
+                        return@Marker true
+                    }
                 )
             }
         }
@@ -256,7 +260,7 @@ fun MapScreen(
                         )
                         Text(
                             text = "Track me!",
-                            color=Color.DarkGray
+                            color = Color.DarkGray
                         )
                     }
                 }
