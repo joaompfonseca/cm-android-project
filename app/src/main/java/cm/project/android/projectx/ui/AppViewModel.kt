@@ -14,9 +14,13 @@ import androidx.compose.runtime.toMutableStateList
 import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import cm.project.android.projectx.db.entities.POI
+import cm.project.android.projectx.db.entities.Point
 import cm.project.android.projectx.db.entities.Rating
+import cm.project.android.projectx.db.entities.Route
 import cm.project.android.projectx.db.repositories.POIRepository
+import cm.project.android.projectx.db.repositories.RouteRepository
 import cm.project.android.projectx.network.AppApi
 import cm.project.android.projectx.network.entities.GeocodeDto
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -31,7 +35,14 @@ import com.utsman.osmandcompose.CameraProperty
 import com.utsman.osmandcompose.CameraState
 import kotlinx.coroutines.launch
 import org.osmdroid.util.GeoPoint
+import java.security.Timestamp
+import java.time.Instant
 import java.util.concurrent.TimeUnit
+import kotlin.math.PI
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 @SuppressLint("MissingPermission")
 class AppViewModel(application: Application) : AndroidViewModel(application) {
@@ -46,6 +57,8 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
     val poiRepository = POIRepository()
 
+    val routeRepository = RouteRepository()
+
     val user = FirebaseAuth.getInstance().currentUser
 
     var poiList by mutableStateOf<List<POI>>(emptyList())
@@ -57,7 +70,13 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     var location by mutableStateOf<GeoPoint?>(null)
         private set
 
+    var routes by mutableStateOf<List<Route>>(emptyList())
+        private set
+
     var isTrackingLocation by mutableStateOf(false)
+        private set
+
+    var routePoints by mutableStateOf<List<Point>>(emptyList())
         private set
 
     var showRoute by mutableStateOf(false)
@@ -87,6 +106,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                 val it = results.lastLocation ?: return
                 location = GeoPoint(it.latitude, it.longitude)
                 if (isTrackingLocation) {
+                    addRoutePoint(it.latitude, it.longitude, Instant.now().toEpochMilli())
                     gotoUserLocation() // Center map on user location
                 }
             }
@@ -138,12 +158,89 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     fun startTrackingUserLocation() {
         viewModelScope.launch {
             isTrackingLocation = true
+            routePoints = emptyList()
         }
     }
 
     fun stopTrackingUserLocation() {
         viewModelScope.launch {
             isTrackingLocation = false
+            if (user != null) {
+                val originCoordinates =
+                    "${routePoints.first().latitude},${routePoints.first().longitude}"
+                val destinationCoordinates =
+                    "${routePoints.last().latitude},${routePoints.last().longitude}"
+
+                val origin =
+                    AppApi.revGeocodeService.getRevGeocode(originCoordinates)["items"]?.get(0)?.title
+                        ?: "Unknown origin"
+                val destination =
+                    AppApi.revGeocodeService.getRevGeocode(destinationCoordinates)["items"]?.get(0)?.title
+                        ?: "Unknown destination"
+
+                // Get average speed based on coordinates and timestamp of a list of points
+                fun totalDistance(points: List<Point>): Double {
+                    fun degreesToRadians(degrees: Double): Double {
+                        return degrees * PI / 180
+                    }
+
+                    fun distanceInMetersBetweenEarthCoordinates(
+                        pointA: Point,
+                        pointB: Point
+                    ): Double {
+                        val earthRadiusMeters = 6371 * 1000;
+
+                        val dLat = degreesToRadians(pointB.latitude - pointA.latitude);
+                        val dLon = degreesToRadians(pointB.longitude - pointA.longitude);
+
+                        val latA = degreesToRadians(pointA.latitude);
+                        val latB = degreesToRadians(pointB.latitude);
+
+                        val a = sin(dLat / 2) * sin(dLat / 2) +
+                                sin(dLon / 2) * sin(dLon / 2) * cos(latA) * cos(latB);
+                        val c = 2 * atan2(sqrt(a), sqrt(1 - a));
+                        return earthRadiusMeters * c;
+                    }
+
+                    var total = 0.0
+                    for (i in 0 until points.size - 1) {
+                        total += distanceInMetersBetweenEarthCoordinates(points[i], points[i+1])
+                    }
+                    return total
+                }
+
+                val averageSpeed =
+                    totalDistance(routePoints) / (routePoints.last().timestamp - routePoints.first().timestamp) / 1000
+
+                val route = Route(
+                    origin = origin,
+                    destination = destination,
+                    averageSpeed = averageSpeed,
+                    routePoints.toMutableList(),
+                    user.uid
+                )
+                addRoute(user.uid, route)
+            }
+        }
+    }
+
+    fun addRoutePoint(latitude: Double, longitude: Double, timestamp: Long) {
+        viewModelScope.launch {
+            routePoints = routePoints.toMutableList().apply {
+                add(Point(latitude, longitude, timestamp))
+            }
+        }
+    }
+
+    suspend fun getRoutes(uid: String) {
+        routes = routeRepository.getAllRoutes(uid)
+    }
+
+    fun addRoute(uid: String, route: Route) {
+        viewModelScope.launch {
+            getRoutes(uid)
+            routes = routes.toMutableList().apply { add(route) }
+            routeRepository.saveRoutes(uid, routes)
         }
     }
 
