@@ -36,6 +36,8 @@ import java.util.concurrent.TimeUnit
 @SuppressLint("MissingPermission")
 class AppViewModel(application: Application) : AndroidViewModel(application) {
 
+    val AVEIRO = GeoPoint(40.6405, -8.6538)
+
     val fusedLocationProviderClient: FusedLocationProviderClient
 
     val locationRequest: LocationRequest
@@ -49,10 +51,13 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     var poiList by mutableStateOf<List<POI>>(emptyList())
         private set
 
-    var camera by mutableStateOf<CameraState?>(null)
+    var camera by mutableStateOf(CameraState(CameraProperty(AVEIRO, 14.0)))
         private set
 
     var location by mutableStateOf<GeoPoint?>(null)
+        private set
+
+    var isTrackingLocation by mutableStateOf(false)
         private set
 
     var showRoute by mutableStateOf(false)
@@ -81,6 +86,9 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             override fun onLocationResult(results: LocationResult) {
                 val it = results.lastLocation ?: return
                 location = GeoPoint(it.latitude, it.longitude)
+                if (isTrackingLocation) {
+                    gotoUserLocation() // Center map on user location
+                }
             }
         }
         // Initialize location
@@ -124,6 +132,18 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             if (location != null) {
                 setCamera(location!!.latitude, location!!.longitude, 18.0)
             }
+        }
+    }
+
+    fun startTrackingUserLocation() {
+        viewModelScope.launch {
+            isTrackingLocation = true
+        }
+    }
+
+    fun stopTrackingUserLocation() {
+        viewModelScope.launch {
+            isTrackingLocation = false
         }
     }
 

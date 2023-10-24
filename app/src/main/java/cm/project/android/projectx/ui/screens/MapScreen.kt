@@ -2,10 +2,9 @@ package cm.project.android.projectx.ui.screens
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.drawable.Drawable
-import android.graphics.drawable.ScaleDrawable
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,7 +38,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -113,53 +111,47 @@ fun MapScreen(
     }
 
     Box(modifier = modifier.fillMaxSize()) {
-        if (vm.camera != null) {
-            OpenStreetMap(
-                modifier = Modifier.fillMaxSize(),
-                cameraState = vm.camera!!,
-                properties = mapProperties,
-                onMapClick = {
-                    println("on click  -> $it")
-                },
-                onMapLongClick = {
-                    println("on long click -> ${it.latitude}, ${it.longitude}")
+        OpenStreetMap(
+            modifier = Modifier.fillMaxSize(),
+            cameraState = vm.camera,
+            properties = mapProperties,
+            onMapClick = {
+                println("on click  -> $it")
+            },
+            onMapLongClick = {
+                println("on long click -> ${it.latitude}, ${it.longitude}")
 
-                },
-                onFirstLoadListener = {
+            },
+            onFirstLoadListener = {
 
-                }
-            ) {
-                vm.poiList.forEach { poi ->
-                    Marker(
-                        state = MarkerState(
-                            geoPoint = GeoPoint(poi.latitude, poi.longitude)
-                        ),
-                        title = poi.name,
-                        icon = context.getDrawable(
-                            when (poi.type) {
-                                "bicycle-parking" -> R.drawable.m_bicycle_parking
-                                "bicycle-shop" -> R.drawable.m_bicycle_shop
-                                "drinking-water" -> R.drawable.m_drinking_water
-                                "toilets" -> R.drawable.m_toilets
-                                "bench" -> R.drawable.m_bench
-                                else -> R.drawable.m_default
-                            }
-                        ),
-                        onClick = { _ ->
-                            vm.showDetails(poi)
-                            return@Marker true
+            }
+        ) {
+            vm.poiList.forEach { poi ->
+                Marker(
+                    state = MarkerState(
+                        geoPoint = GeoPoint(poi.latitude, poi.longitude)
+                    ),
+                    title = poi.name,
+                    icon = context.getDrawable(
+                        when (poi.type) {
+                            "bicycle-parking" -> R.drawable.m_bicycle_parking
+                            "bicycle-shop" -> R.drawable.m_bicycle_shop
+                            "drinking-water" -> R.drawable.m_drinking_water
+                            "toilets" -> R.drawable.m_toilets
+                            "bench" -> R.drawable.m_bench
+                            else -> R.drawable.m_default
                         }
-                    )
-                }
+                    ),
+                    onClick = { _ ->
+                        vm.showDetails(poi)
+                        return@Marker true
+                    }
+                )
+            }
+            if (vm.location != null) {
                 Marker(
                     icon = context.getDrawable(R.drawable.user_location),
-                    state = MarkerState(
-                        geoPoint = if (vm.location != null) GeoPoint(
-                            vm.location!!.latitude - 0.0001,
-                            vm.location!!.longitude
-                        )
-                        else GeoPoint(0.0, 0.0)
-                    )
+                    state = MarkerState(geoPoint = vm.location!!)
                 )
             }
         }
@@ -245,22 +237,45 @@ fun MapScreen(
                 text = { Text("POI") }
             )
             //
-            // Find User
+            // Track / Un-track User
             //
-            LargeFloatingActionButton(
-                onClick = { vm.gotoUserLocation() },
-                shape = CircleShape,
-                modifier = Modifier
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
+            if (!vm.isTrackingLocation) {
+                LargeFloatingActionButton(
+                    onClick = { vm.gotoUserLocation(); vm.startTrackingUserLocation() },
+                    shape = CircleShape,
+                    containerColor = Color.Green
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.LocationOn,
-                        contentDescription = "Find me!",
-                        modifier = Modifier.size(30.dp)
-                    )
-                    Text("Find me!")
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.LocationOn,
+                            contentDescription = "Track me!",
+                            tint = Color.DarkGray,
+                            modifier = Modifier.size(30.dp)
+                        )
+                        Text(
+                            text = "Track me!",
+                            color=Color.DarkGray
+                        )
+                    }
+                }
+            } else {
+                LargeFloatingActionButton(
+                    onClick = { vm.stopTrackingUserLocation() },
+                    shape = CircleShape,
+                    containerColor = Color.Red
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.LocationOn,
+                            contentDescription = "Stop",
+                            modifier = Modifier.size(30.dp)
+                        )
+                        Text("Stop")
+                    }
                 }
             }
             //
