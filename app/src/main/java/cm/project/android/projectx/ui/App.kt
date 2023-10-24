@@ -30,6 +30,7 @@ import cm.project.android.projectx.R
 import cm.project.android.projectx.ui.screens.AddPOIScreen
 import cm.project.android.projectx.ui.screens.AddUserScreen
 import cm.project.android.projectx.ui.screens.MapScreen
+import cm.project.android.projectx.ui.screens.ShowRoutes
 import cm.project.android.projectx.ui.screens.ShowUserDetails
 
 enum class AppScreen(@StringRes val title: Int) {
@@ -37,7 +38,7 @@ enum class AppScreen(@StringRes val title: Int) {
     AddPOI(title = R.string.add_poi_screen),
     AddUser(title = R.string.add_user_screen),
     ShowUserDetails(title = R.string.show_user_details_screen),
-    AddRoute(title = R.string.add_route_screen),
+    ShowRoutes(title = R.string.show_routes_screen),
     Profile(title = R.string.profile_screen)
 }
 
@@ -74,7 +75,8 @@ fun App(
                     vm = vm,
                     onAddPOI = { navController.navigate(AppScreen.AddPOI.name) },
                     onAddUser = { navController.navigate(AppScreen.AddUser.name) },
-                    showUser = { navController.navigate(AppScreen.ShowUserDetails.name) }
+                    showUser = { navController.navigate(AppScreen.ShowUserDetails.name) },
+                    onShowRoutes = { navController.navigate(AppScreen.ShowRoutes.name) }
                 )
             }
             composable(route = AppScreen.AddPOI.name) {
@@ -91,6 +93,12 @@ fun App(
             }
             composable(route = AppScreen.ShowUserDetails.name) {
                 ShowUserDetails(
+                    vm = vm,
+                    onBack = { navController.popBackStack(AppScreen.Map.name, inclusive = false) },
+                )
+            }
+            composable(route = AppScreen.ShowRoutes.name) {
+                ShowRoutes(
                     vm = vm,
                     onBack = { navController.popBackStack(AppScreen.Map.name, inclusive = false) },
                 )

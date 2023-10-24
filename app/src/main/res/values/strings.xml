@@ -2,7 +2,7 @@
     <string name="app_name">Project X</string>
     <string name="map_screen">Map</string>
     <string name="add_poi_screen">Add POI</string>
-    <string name="add_route_screen">Add Route</string>
+    <string name="show_routes_screen">All Routes</string>
     <string name="add_user_screen">Add User</string>
     <string name="show_user_details_screen">User Details</string>
     <string name="profile_screen">My Profile</string>

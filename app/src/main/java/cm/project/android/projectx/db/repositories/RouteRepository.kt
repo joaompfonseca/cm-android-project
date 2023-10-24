@@ -5,6 +5,7 @@ import cm.project.android.projectx.db.entities.POI
 import cm.project.android.projectx.db.entities.Rating
 import cm.project.android.projectx.db.entities.Route
 import com.google.firebase.database.ktx.database
+import com.google.firebase.database.ktx.getValue
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.tasks.await
@@ -16,6 +17,17 @@ private const val STORAGE_URL = "gs://cm-android-project-39eba.appspot.com"
 class RouteRepository {
 
     private val db = Firebase.database(DB_URL).getReference("route")
+
+    suspend fun getAllRoutes(): HashMap<String, List<Route>> {
+        val res = HashMap<String, List<Route>>()
+        val data = db.get().await()
+        for (obj in data.children) {
+            val uid = obj.key ?: continue
+            val routes  = getAllRoutes(uid)
+            res[uid] = routes
+        }
+        return res
+    }
 
     suspend fun getAllRoutes(uid: String): List<Route> {
         val res = mutableListOf<Route>()

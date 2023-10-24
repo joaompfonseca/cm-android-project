@@ -50,6 +50,9 @@ fun AddUserScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+
+    vm.user?.let { vm.getUser(it.uid) }
+
     var name by rememberSaveable { mutableStateOf("") }
 
     var hasImage by rememberSaveable { mutableStateOf(false) }

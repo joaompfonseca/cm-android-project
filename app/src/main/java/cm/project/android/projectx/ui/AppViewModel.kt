@@ -25,7 +25,6 @@ import cm.project.android.projectx.db.repositories.RouteRepository
 import cm.project.android.projectx.db.repositories.UserRepository
 import cm.project.android.projectx.network.AppApi
 import cm.project.android.projectx.network.entities.GeocodeDto
-import com.firebase.ui.auth.data.model.User.getUser
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -33,13 +32,10 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices.getFusedLocationProviderClient
 import com.google.android.gms.location.Priority
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.ktx.Firebase
 import com.utsman.osmandcompose.CameraProperty
 import com.utsman.osmandcompose.CameraState
 import kotlinx.coroutines.launch
-import okhttp3.internal.wait
 import org.osmdroid.util.GeoPoint
-import java.security.Timestamp
 import java.time.Instant
 import java.util.concurrent.TimeUnit
 import kotlin.math.PI
@@ -48,7 +44,7 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
 
-@SuppressLint("MissingPermission")
+@SuppressLint("MissingPermission", "MutableCollectionMutableState")
 class AppViewModel(application: Application) : AndroidViewModel(application) {
 
     val AVEIRO = GeoPoint(40.6405, -8.6538)
@@ -82,10 +78,19 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     var routes by mutableStateOf<List<Route>>(emptyList())
         private set
 
+    var allRoutes by mutableStateOf<HashMap<String, List<Route>>>(HashMap())
+        private set
+
     var isTrackingLocation by mutableStateOf(false)
         private set
 
     var routePoints by mutableStateOf<List<Point>>(emptyList())
+        private set
+
+    var isDisplayRoute by mutableStateOf(false)
+        private set
+
+    var displayRoute by mutableStateOf<Route?>(null)
         private set
 
     var showRoute by mutableStateOf(false)
@@ -115,6 +120,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                 val it = results.lastLocation ?: return
                 location = GeoPoint(it.latitude, it.longitude)
                 if (isTrackingLocation) {
+                    addRoutePoint(it.latitude, it.longitude, Instant.now().toEpochMilli())
                     gotoUserLocation() // Center map on user location
                 }
             }
@@ -180,7 +186,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     fun stopTrackingUserLocation() {
         viewModelScope.launch {
             isTrackingLocation = false
-            if (user != null) {
+            if (userl != null && routePoints.isNotEmpty()) {
                 val originCoordinates =
                     "${routePoints.first().latitude},${routePoints.first().longitude}"
                 val destinationCoordinates =
@@ -219,23 +225,26 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
                     var total = 0.0
                     for (i in 0 until points.size - 1) {
-                        total += distanceInMetersBetweenEarthCoordinates(points[i], points[i+1])
+                        total += distanceInMetersBetweenEarthCoordinates(points[i], points[i + 1])
                     }
                     return total
                 }
 
-                val averageSpeed =
-                    totalDistance(routePoints) / (routePoints.last().timestamp - routePoints.first().timestamp) / 1000
+                val totalDistance = totalDistance(routePoints)
+                val totalDuration =
+                    (routePoints.last().timestamp - routePoints.first().timestamp) / 1000
 
                 val route = Route(
                     origin = origin,
                     destination = destination,
-                    averageSpeed = averageSpeed,
+                    totalDistance = totalDistance,
+                    totalDuration = totalDuration,
                     routePoints.toMutableList(),
-                    user.uid
+                    userl!!.username
                 )
-                addRoute(user.uid, route)
+                addRoute(user!!.uid, route)
             }
+            routePoints = emptyList()
         }
     }
 
@@ -251,11 +260,30 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         routes = routeRepository.getAllRoutes(uid)
     }
 
+    suspend fun getAllRoutes() {
+        allRoutes = routeRepository.getAllRoutes()
+    }
+
     fun addRoute(uid: String, route: Route) {
         viewModelScope.launch {
             getRoutes(uid)
             routes = routes.toMutableList().apply { add(route) }
             routeRepository.saveRoutes(uid, routes)
+        }
+    }
+
+    fun displayRoute(route: Route) {
+        viewModelScope.launch {
+            displayRoute = route
+            isDisplayRoute = true
+            setCamera(route.points.first().latitude, route.points.first().longitude, 16.0)
+        }
+    }
+
+    fun clearDisplayRoute() {
+        viewModelScope.launch {
+            displayRoute = null
+            isDisplayRoute = false
         }
     }
 

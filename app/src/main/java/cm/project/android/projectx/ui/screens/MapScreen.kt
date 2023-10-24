@@ -72,6 +72,8 @@ import com.utsman.osmandcompose.MapProperties
 import com.utsman.osmandcompose.Marker
 import com.utsman.osmandcompose.MarkerState
 import com.utsman.osmandcompose.OpenStreetMap
+import com.utsman.osmandcompose.Polyline
+import com.utsman.osmandcompose.PolylineCap
 import com.utsman.osmandcompose.ZoomButtonVisibility
 import kotlinx.coroutines.delay
 import okhttp3.internal.wait
@@ -88,6 +90,7 @@ fun MapScreen(
     onAddPOI: () -> Unit,
     onAddUser: () -> Unit,
     showUser: () -> Unit,
+    onShowRoutes: () -> Unit
 ) {
 
     val context = LocalContext.current
@@ -162,6 +165,31 @@ fun MapScreen(
                     }
                 )
             }
+            //
+            // Current tracked route
+            //
+            Polyline(
+                geoPoints = vm.routePoints.map { GeoPoint(it.latitude, it.longitude) },
+                color = Color.Green,
+                cap = PolylineCap.ROUND,
+                width = 15.0f
+            )
+            //
+            // Selected guide route
+            //
+            if (vm.isDisplayRoute) {
+                Polyline(
+                    geoPoints = vm.displayRoute!!.points.map {
+                        GeoPoint(
+                            it.latitude,
+                            it.longitude
+                        )
+                    },
+                    color = Color.Red,
+                    cap = PolylineCap.ROUND,
+                    width = 15.0f
+                )
+            }
         }
         Row(
             horizontalArrangement = Arrangement.Start,
@@ -177,12 +205,12 @@ fun MapScreen(
                 //
                 FloatingActionButton(
                     onClick = {
-                              if (vm.userl !=null) {
-                                  showUser()
-                              } else {
-                                  onAddUser()
-                              }
-                    }, // TODO: Go to profile page
+                        if (vm.userl != null) {
+                            showUser()
+                        } else {
+                            onAddUser()
+                        }
+                    },
                     contentColor = Color.DarkGray,
                     containerColor = Color.Gray,
                     modifier = Modifier
@@ -192,6 +220,31 @@ fun MapScreen(
                         imageVector = Icons.Rounded.Person,
                         contentDescription = "Profile",
                         modifier = Modifier.size(30.dp)
+                    )
+                }
+                //
+                // Routes Page
+                //
+                FloatingActionButton(
+                    onClick = {
+                        if (vm.userl != null) {
+                            onShowRoutes()
+                        } else {
+                            onAddUser()
+                        }
+                    },
+                    contentColor = Color.DarkGray,
+                    containerColor = Color.Gray,
+                    modifier = Modifier
+                        .padding(bottom = 20.dp, end = 20.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Send,
+                        contentDescription = "Routes",
+                        modifier = Modifier
+                            .size(30.dp)
+                            .rotate(-45f)
+                            .padding(start = 5.dp)
                     )
                 }
                 //
@@ -223,96 +276,131 @@ fun MapScreen(
                     .fillMaxWidth()
             )
         }
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
+        Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(20.dp)
-                .fillMaxWidth()
         ) {
-            //
-            // Add POI
-            //
-            ExtendedFloatingActionButton(
-                onClick = {
-                    if (vm.userl != null) {
-                        if (vm.location != null) {
-                            onAddPOI()
-                        } else {
-                            Toast.makeText(context, "Please enable location", Toast.LENGTH_SHORT).show()
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                //
+                // Clear Display Route
+                //
+                if (vm.isDisplayRoute) {
+                    FloatingActionButton(
+                        onClick = { vm.clearDisplayRoute() },
+                        containerColor = Color.Red
+                    ) {
+                        Column (
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier
+                                    .padding(10.dp)
+                        ){
+                            Icon(
+                                imageVector = Icons.Rounded.Close,
+                                contentDescription = "Clear Displayed Route"
+                            )
+                            Text("Clear Displayed Route")
                         }
-                    }
-                    else {
-                        onAddUser()
-                    }
-                },
-                icon = {
-                    Icon(
-                        imageVector = Icons.Rounded.Add,
-                        contentDescription = "Add POI"
-                    )
-                },
-                text = { Text("POI") }
-            )
-            //
-            // Track / Un-track User
-            //
-            if (!vm.isTrackingLocation) {
-                LargeFloatingActionButton(
-                    onClick = { vm.gotoUserLocation(); vm.startTrackingUserLocation() },
-                    shape = CircleShape,
-                    containerColor = Color.Green
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.LocationOn,
-                            contentDescription = "Track me!",
-                            tint = Color.DarkGray,
-                            modifier = Modifier.size(30.dp)
-                        )
-                        Text(
-                            text = "Track me!",
-                            color = Color.DarkGray
-                        )
-                    }
-                }
-            } else {
-                LargeFloatingActionButton(
-                    onClick = { vm.stopTrackingUserLocation() },
-                    shape = CircleShape,
-                    containerColor = Color.Red
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.LocationOn,
-                            contentDescription = "Stop",
-                            modifier = Modifier.size(30.dp)
-                        )
-                        Text("Stop")
                     }
                 }
             }
-            //
-            // Create Route
-            //
-            ExtendedFloatingActionButton(
-                onClick = { vm.showRoute() },
-                icon = {
-                    Icon(
-                        imageVector = Icons.Rounded.Send,
-                        contentDescription = "Go to location",
-                        modifier = Modifier
-                            .rotate(-45f)
-                            .padding(bottom = 5.dp)
-                    )
-                },
-                text = { Text("GO") }
-            )
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .padding(20.dp)
+                    .fillMaxWidth()
+            ) {
+                //
+                // Add POI
+                //
+                ExtendedFloatingActionButton(
+                    onClick = {
+                        if (vm.userl != null) {
+                            if (vm.location != null) {
+                                onAddPOI()
+                            } else {
+                                Toast.makeText(
+                                    context,
+                                    "Please enable location",
+                                    Toast.LENGTH_SHORT
+                                )
+                                    .show()
+                            }
+                        } else {
+                            onAddUser()
+                        }
+                    },
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Rounded.Add,
+                            contentDescription = "Add POI"
+                        )
+                    },
+                    text = { Text("POI") }
+                )
+                //
+                // Track / Un-track User
+                //
+                if (!vm.isTrackingLocation) {
+                    LargeFloatingActionButton(
+                        onClick = { vm.gotoUserLocation(); vm.startTrackingUserLocation() },
+                        shape = CircleShape,
+                        containerColor = Color.Green
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.LocationOn,
+                                contentDescription = "Track me!",
+                                tint = Color.DarkGray,
+                                modifier = Modifier.size(30.dp)
+                            )
+                            Text(
+                                text = "Track me!",
+                                color = Color.DarkGray
+                            )
+                        }
+                    }
+                } else {
+                    LargeFloatingActionButton(
+                        onClick = { vm.stopTrackingUserLocation() },
+                        shape = CircleShape,
+                        containerColor = Color.Red
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.LocationOn,
+                                contentDescription = "Stop",
+                                modifier = Modifier.size(30.dp)
+                            )
+                            Text("Stop")
+                        }
+                    }
+                }
+                //
+                // Create Route
+                //
+                ExtendedFloatingActionButton(
+                    onClick = { vm.showRoute() },
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Rounded.Send,
+                            contentDescription = "Go to location",
+                            modifier = Modifier
+                                .rotate(-45f)
+                                .padding(bottom = 5.dp)
+                        )
+                    },
+                    text = { Text("GO") }
+                )
+            }
         }
         //
         // Create a Route
