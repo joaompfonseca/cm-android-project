@@ -16,9 +16,12 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import cm.project.android.projectx.db.entities.POI
 import cm.project.android.projectx.db.entities.Rating
+import cm.project.android.projectx.db.entities.User
 import cm.project.android.projectx.db.repositories.POIRepository
+import cm.project.android.projectx.db.repositories.UserRepository
 import cm.project.android.projectx.network.AppApi
 import cm.project.android.projectx.network.entities.GeocodeDto
+import com.firebase.ui.auth.data.model.User.getUser
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -30,6 +33,7 @@ import com.google.firebase.ktx.Firebase
 import com.utsman.osmandcompose.CameraProperty
 import com.utsman.osmandcompose.CameraState
 import kotlinx.coroutines.launch
+import okhttp3.internal.wait
 import org.osmdroid.util.GeoPoint
 import java.util.concurrent.TimeUnit
 
@@ -46,7 +50,12 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
     val poiRepository = POIRepository()
 
+    val userRepository = UserRepository()
+
     val user = FirebaseAuth.getInstance().currentUser
+
+    var userl by mutableStateOf<User?>(null)
+        private set
 
     var poiList by mutableStateOf<List<POI>>(emptyList())
         private set
@@ -110,6 +119,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         //
 
         getPOIs()
+        user?.let { getUser(it.uid) }
     }
 
     fun setCamera(latitude: Double, longitude: Double, zoom: Double) {
@@ -124,6 +134,12 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     fun getPOIs() {
         viewModelScope.launch {
             poiList = poiRepository.getAllPOIs()
+        }
+    }
+
+    fun getUser(id: String) {
+        viewModelScope.launch {
+            userl = userRepository.getUser(id)
         }
     }
 
@@ -210,6 +226,12 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             val savedPOI = poiRepository.savePOI(poi, imageUri)
             poiList = poiList.toMutableList().apply { add(savedPOI) }
+        }
+    }
+
+    fun addUser(user: User, imageUri: Uri) {
+        viewModelScope.launch {
+            userl = userRepository.saveUser(user, imageUri)
         }
     }
 
