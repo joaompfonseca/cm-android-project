@@ -28,15 +28,20 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import cm.project.android.projectx.R
 import cm.project.android.projectx.ui.screens.AddPOIScreen
+import cm.project.android.projectx.ui.screens.AddUserScreen
 import cm.project.android.projectx.ui.screens.MapScreen
+import cm.project.android.projectx.ui.screens.ShowUserDetails
 
 enum class AppScreen(@StringRes val title: Int) {
     Map(title = R.string.map_screen),
     AddPOI(title = R.string.add_poi_screen),
+    AddUser(title = R.string.add_user_screen),
+    ShowUserDetails(title = R.string.show_user_details_screen),
     AddRoute(title = R.string.add_route_screen),
     Profile(title = R.string.profile_screen)
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun App(
     modifier: Modifier = Modifier,
@@ -59,7 +64,6 @@ fun App(
             )
         }
     ) { innerPadding ->
-
         NavHost(
             navController = navController,
             startDestination = AppScreen.Map.name,
@@ -69,10 +73,24 @@ fun App(
                 MapScreen(
                     vm = vm,
                     onAddPOI = { navController.navigate(AppScreen.AddPOI.name) },
+                    onAddUser = { navController.navigate(AppScreen.AddUser.name) },
+                    showUser = { navController.navigate(AppScreen.ShowUserDetails.name) }
                 )
             }
             composable(route = AppScreen.AddPOI.name) {
                 AddPOIScreen(
+                    vm = vm,
+                    onBack = { navController.popBackStack(AppScreen.Map.name, inclusive = false) },
+                )
+            }
+            composable(route = AppScreen.AddUser.name) {
+                AddUserScreen(
+                    vm = vm,
+                    onBack = { navController.popBackStack(AppScreen.Map.name, inclusive = false) },
+                )
+            }
+            composable(route = AppScreen.ShowUserDetails.name) {
+                ShowUserDetails(
                     vm = vm,
                     onBack = { navController.popBackStack(AppScreen.Map.name, inclusive = false) },
                 )
