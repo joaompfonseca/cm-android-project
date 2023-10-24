@@ -77,6 +77,8 @@ import com.utsman.osmandcompose.Marker
 import com.utsman.osmandcompose.MarkerState
 import com.utsman.osmandcompose.OpenStreetMap
 import com.utsman.osmandcompose.ZoomButtonVisibility
+import kotlinx.coroutines.delay
+import okhttp3.internal.wait
 import org.osmdroid.tileprovider.tilesource.ITileSource
 import org.osmdroid.tileprovider.tilesource.XYTileSource
 import org.osmdroid.util.GeoPoint
@@ -87,7 +89,9 @@ import org.osmdroid.util.GeoPoint
 fun MapScreen(
     modifier: Modifier = Modifier,
     vm: AppViewModel = viewModel(),
-    onAddPOI: () -> Unit
+    onAddPOI: () -> Unit,
+    onAddUser: () -> Unit,
+    showUser: () -> Unit,
 ) {
 
     val context = LocalContext.current
@@ -164,7 +168,13 @@ fun MapScreen(
                 // Profile Page
                 //
                 FloatingActionButton(
-                    onClick = { }, // TODO: Go to profile page
+                    onClick = {
+                              if (vm.userl !=null) {
+                                  showUser()
+                              } else {
+                                  onAddUser()
+                              }
+                    }, // TODO: Go to profile page
                     contentColor = Color.DarkGray,
                     containerColor = Color.Gray,
                     modifier = Modifier
@@ -218,10 +228,15 @@ fun MapScreen(
             //
             ExtendedFloatingActionButton(
                 onClick = {
-                    if (vm.location != null) {
-                        onAddPOI()
-                    } else {
-                        Toast.makeText(context, "Please enable location", Toast.LENGTH_SHORT).show()
+                    if (vm.userl != null) {
+                        if (vm.location != null) {
+                            onAddPOI()
+                        } else {
+                            Toast.makeText(context, "Please enable location", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                    else {
+                        onAddUser()
                     }
                 },
                 icon = {
