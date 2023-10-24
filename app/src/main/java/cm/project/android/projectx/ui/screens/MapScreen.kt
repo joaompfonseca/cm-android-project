@@ -143,7 +143,8 @@ fun MapScreen(
                                 "toilets" -> R.drawable.m_toilets
                                 "bench" -> R.drawable.m_bench
                                 else -> R.drawable.m_default
-                            }),
+                            }
+                        ),
                         onClick = { _ ->
                             vm.showDetails(poi)
                             return@Marker true
@@ -151,9 +152,13 @@ fun MapScreen(
                     )
                 }
                 Marker(
-                    icon = LocalContext.current.getDrawable(R.drawable.user_location),
+                    icon = context.getDrawable(R.drawable.user_location),
                     state = MarkerState(
-                        geoPoint = vm.location ?: GeoPoint(0.0, 0.0)
+                        geoPoint = if (vm.location != null) GeoPoint(
+                            vm.location!!.latitude - 0.0001,
+                            vm.location!!.longitude
+                        )
+                        else GeoPoint(0.0, 0.0)
                     )
                 )
             }
