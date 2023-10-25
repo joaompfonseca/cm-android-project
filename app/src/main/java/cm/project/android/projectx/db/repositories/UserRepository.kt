@@ -29,4 +29,21 @@ class UserRepository {
         db.child(id).setValue(updatedUser).await()
         return updatedUser
     }
+
+    suspend fun updateUser(id: String, type: String, xp: Int) {
+        val user = db.child(id).get().await().getValue(User::class.java)
+        if (user != null) {
+            if (type == "added") {
+                user.totalXP += xp
+                user.addedPOIs += 1
+            } else if (type == "received") {
+                user.totalXP += xp
+                user.receivedRatings += 1
+            } else if (type == "given") {
+                user.totalXP += xp
+                user.givenRatings += 1
+            }
+            db.child(id).setValue(user).await()
+        }
+    }
 }

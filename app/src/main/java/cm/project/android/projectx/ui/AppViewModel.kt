@@ -359,6 +359,12 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun updateUser(id: String, type: String, xp: Int) {
+        viewModelScope.launch {
+            userRepository.updateUser(id, type, xp)
+        }
+    }
+
     fun ratePOI(poi: POI, rating: Rating) {
         viewModelScope.launch {
             val ratings = poi.ratings.toMutableList()

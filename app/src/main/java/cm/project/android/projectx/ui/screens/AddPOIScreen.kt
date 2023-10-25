@@ -264,6 +264,7 @@ fun AddPOIScreen(
                     ),
                     imageUri!!
                 )
+                vm.updateUser(vm.user!!.uid, "added", 50)
                 onBack()
             },
             icon = {

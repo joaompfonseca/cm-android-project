@@ -462,6 +462,9 @@ fun MapScreen(
                     uid = vm.user!!.uid,
                     ratePOI = { value ->
                         vm.ratePOI(vm.selectedPOI!!, Rating(vm.user!!.uid, value))
+                    },
+                    updateUser = { id, type, xp ->
+                        vm.updateUser(id, type, xp)
                     }
                 )
             }
@@ -604,6 +607,7 @@ fun POIDetails(
     poi: POI,
     uid: String,
     ratePOI: (Boolean) -> Unit,
+    updateUser: (String, String, Int) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -677,6 +681,11 @@ fun POIDetails(
                         enabled = poi.ratings.none { it.user == uid && it.value },
                         onClick = {
                             ratePOI(true)
+                            // check if user already rated this POI
+                            if (poi.ratings.none { it.user == uid} ) {
+                                updateUser(poi.createdBy, "received", 10)
+                                updateUser(uid, "given", 10)
+                            }
                         }
                     ) {
                         Text(text = "\uD83D\uDC4D")
@@ -690,6 +699,10 @@ fun POIDetails(
                         enabled = poi.ratings.none { it.user == uid && !it.value },
                         onClick = {
                             ratePOI(false)
+                            if (poi.ratings.none { it.user == uid} ) {
+                                updateUser(poi.createdBy, "received", 10)
+                                updateUser(uid, "given", 10)
+                            }
                         }
                     ) {
                         Text(text = "\uD83D\uDC4E")

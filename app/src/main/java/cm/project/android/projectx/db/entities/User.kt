@@ -4,10 +4,10 @@ data class User(
     val id: String,
     val username: String,
     val pictureUrl: String,
-    val totalXP : Int,
-    val addedPOIs: Int,
-    val receivedRatings: Int,
-    val givenRatings: Int,
+    var totalXP : Int,
+    var addedPOIs: Int,
+    var receivedRatings: Int,
+    var givenRatings: Int,
 ){
     constructor(): this("","","",0,0,0,0)
 }
