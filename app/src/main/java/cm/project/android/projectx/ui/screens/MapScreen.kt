@@ -24,6 +24,8 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.ExitToApp
+import androidx.compose.material.icons.rounded.Face
+import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Send
@@ -239,6 +241,27 @@ fun MapScreen(
                     )
                 }
                 //
+                // Logout
+                //
+                FloatingActionButton(
+                    onClick = { logout(context) },
+                    contentColor = Color.DarkGray,
+                    containerColor = Color.LightGray,
+                    modifier = Modifier
+                        .padding(bottom = 20.dp, end = 20.dp)
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.ExitToApp,
+                            contentDescription = "Logout",
+                            modifier = Modifier.size(30.dp)
+                        )
+                        Text("Logout")
+                    }
+                }
+                //
                 // Routes Page
                 //
                 FloatingActionButton(
@@ -250,7 +273,7 @@ fun MapScreen(
                         }
                     },
                     contentColor = Color.DarkGray,
-                    containerColor = Color.Gray,
+                    containerColor = Color.Yellow,
                     modifier = Modifier
                         .padding(bottom = 20.dp, end = 20.dp)
                 ) {
@@ -264,23 +287,20 @@ fun MapScreen(
                     )
                 }
                 //
-                // Logout
+                // Find Me
                 //
                 FloatingActionButton(
-                    onClick = { logout(context) },
-                    contentColor = Color.DarkGray,
-                    containerColor = Color.LightGray,
+                    onClick = { vm.gotoUserLocation() },
+                    contentColor = Color.LightGray,
+                    containerColor = Color.Blue,
+                    shape = CircleShape,
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.ExitToApp,
-                            contentDescription = "Logout",
-                            modifier = Modifier.size(30.dp)
-                        )
-                        Text("Logout")
-                    }
+                    Icon(
+                        imageVector = Icons.Rounded.LocationOn,
+                        contentDescription = "Find Me!",
+                        modifier = Modifier
+                            .size(30.dp)
+                    )
                 }
             }
             //
@@ -309,11 +329,11 @@ fun MapScreen(
                         onClick = { vm.clearDisplayRoute() },
                         containerColor = Color.Red
                     ) {
-                        Column (
+                        Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier
-                                    .padding(10.dp)
-                        ){
+                                .padding(10.dp)
+                        ) {
                             Icon(
                                 imageVector = Icons.Rounded.Close,
                                 contentDescription = "Clear Displayed Route"
