@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.LocationOn
@@ -54,7 +56,10 @@ fun ShowRoutes(
         }
     }
 
-    Column {
+    Column(
+        modifier = Modifier
+            .verticalScroll(rememberScrollState()),
+    ) {
         vm.allRoutes.forEach {
             Column {
                 Text(
@@ -62,7 +67,9 @@ fun ShowRoutes(
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .padding(top = 20.dp, bottom = 20.dp)
+                        .fillMaxWidth()
                 )
                 it.value.forEach {
                     RouteItem(
@@ -96,11 +103,34 @@ fun RouteItem(
         Column(
             modifier = Modifier.padding(10.dp)
         ) {
-            Text("Origin: ${route.origin}")
-            Text("Destination: ${route.destination}")
-            Text(String.format("Total Distance (m): %.3f", route.totalDistance))
-            Text(String.format("Total Duration (s): %d", route.totalDuration))
-            Text(String.format("Average Speed (m/s): %.3f", route.totalDistance / route.totalDuration))
+            Text(
+                text = "Origin",
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp
+            )
+            Text(route.origin)
+
+            Text(
+                text = "Destination",
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                modifier=Modifier.padding(top=20.dp)
+            )
+            Text(route.destination)
+
+            Text(
+                text = "Metrics",
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                modifier=Modifier.padding(top=20.dp)
+            )
+            Text(String.format("%.3f meters, %d seconds", route.totalDistance, route.totalDuration))
+            Text(
+                String.format(
+                    "Average Speed: %.3f km/h",
+                    3.6*(route.totalDistance / route.totalDuration)
+                )
+            )
             Text("Number of Points: ${route.points.size}")
             Button(
                 onClick = {
@@ -108,6 +138,7 @@ fun RouteItem(
                     onBack()
                 },
                 modifier = Modifier
+                    .padding(top=20.dp)
                     .fillMaxWidth()
             ) {
                 Text("Display Route")

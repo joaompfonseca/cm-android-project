@@ -31,6 +31,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
@@ -92,6 +93,21 @@ fun MapScreen(
     showUser: () -> Unit,
     onShowRoutes: () -> Unit
 ) {
+
+    if (vm.userl == null) {
+        Box(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            CircularProgressIndicator(
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                trackColor = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier
+                    .width(64.dp)
+                    .align(Alignment.Center)
+            )
+        }
+        return
+    }
 
     val context = LocalContext.current
 
