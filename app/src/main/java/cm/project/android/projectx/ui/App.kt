@@ -21,11 +21,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import androidx.navigation.NavOptions
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navOptions
 import cm.project.android.projectx.R
 import cm.project.android.projectx.ui.screens.AddPOIScreen
 import cm.project.android.projectx.ui.screens.AddUserScreen
@@ -37,7 +40,7 @@ enum class AppScreen(@StringRes val title: Int) {
     Map(title = R.string.map_screen),
     AddPOI(title = R.string.add_poi_screen),
     AddUser(title = R.string.add_user_screen),
-    ShowUserDetails(title = R.string.show_user_details_screen),
+    UserDetails(title = R.string.show_user_details_screen),
     ShowRoutes(title = R.string.show_routes_screen),
     Profile(title = R.string.profile_screen)
 }
@@ -46,12 +49,12 @@ enum class AppScreen(@StringRes val title: Int) {
 @Composable
 fun App(
     modifier: Modifier = Modifier,
-    navController: NavHostController = rememberNavController(),
     vm: AppViewModel = viewModel()
 ) {
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    // Navigation
+    val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
+
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val currentScreen = AppScreen.valueOf(backStackEntry?.destination?.route ?: AppScreen.Map.name)
 
     Scaffold(
@@ -75,7 +78,7 @@ fun App(
                     vm = vm,
                     onAddPOI = { navController.navigate(AppScreen.AddPOI.name) },
                     onAddUser = { navController.navigate(AppScreen.AddUser.name) },
-                    showUser = { navController.navigate(AppScreen.ShowUserDetails.name) },
+                    onUserDetails = { navController.navigate(AppScreen.UserDetails.name) },
                     onShowRoutes = { navController.navigate(AppScreen.ShowRoutes.name) }
                 )
             }
@@ -91,7 +94,7 @@ fun App(
                     onBack = { navController.popBackStack(AppScreen.Map.name, inclusive = false) },
                 )
             }
-            composable(route = AppScreen.ShowUserDetails.name) {
+            composable(route = AppScreen.UserDetails.name) {
                 ShowUserDetails(
                     vm = vm,
                     onBack = { navController.popBackStack(AppScreen.Map.name, inclusive = false) },

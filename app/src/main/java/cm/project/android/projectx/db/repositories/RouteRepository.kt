@@ -40,7 +40,8 @@ class RouteRepository {
         return res
     }
 
-    suspend fun saveRoutes(uid: String, routes: List<Route>) {
-        db.child(uid).setValue(routes).await()
+    suspend fun saveRoute(uid: String, route: Route) {
+        val id = route.hashCode().toString()
+        db.child(uid).child(id).setValue(route).await()
     }
 }

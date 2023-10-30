@@ -92,7 +92,7 @@ fun MapScreen(
     vm: AppViewModel = viewModel(),
     onAddPOI: () -> Unit,
     onAddUser: () -> Unit,
-    showUser: () -> Unit,
+    onUserDetails: () -> Unit,
     onShowRoutes: () -> Unit
 ) {
 
@@ -224,7 +224,7 @@ fun MapScreen(
                 FloatingActionButton(
                     onClick = {
                         if (vm.userl != null) {
-                            showUser()
+                            onUserDetails()
                         } else {
                             onAddUser()
                         }

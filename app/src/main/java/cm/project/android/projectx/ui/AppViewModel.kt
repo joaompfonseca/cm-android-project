@@ -75,9 +75,6 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     var location by mutableStateOf<GeoPoint?>(null)
         private set
 
-    var routes by mutableStateOf<List<Route>>(emptyList())
-        private set
-
     var allRoutes by mutableStateOf<HashMap<String, List<Route>>>(HashMap())
         private set
 
@@ -256,19 +253,15 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    suspend fun getRoutes(uid: String) {
-        routes = routeRepository.getAllRoutes(uid)
-    }
-
-    suspend fun getAllRoutes() {
-        allRoutes = routeRepository.getAllRoutes()
+    fun getAllRoutes() {
+        viewModelScope.launch {
+            allRoutes = routeRepository.getAllRoutes()
+        }
     }
 
     fun addRoute(uid: String, route: Route) {
         viewModelScope.launch {
-            getRoutes(uid)
-            routes = routes.toMutableList().apply { add(route) }
-            routeRepository.saveRoutes(uid, routes)
+            routeRepository.saveRoute(uid, route)
         }
     }
 

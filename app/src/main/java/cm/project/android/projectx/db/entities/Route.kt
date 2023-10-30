@@ -9,4 +9,11 @@ data class Route(
     val createdBy: String
 ) {
     constructor(): this("", "", 0.0,0L,mutableListOf(),"")
+    override fun hashCode(): Int {
+        return points.first().timestamp.hashCode()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return super.equals(other)
+    }
 }
