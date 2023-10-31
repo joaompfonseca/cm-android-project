@@ -58,7 +58,7 @@ fun App(
     val currentScreen = AppScreen.valueOf(backStackEntry?.destination?.route ?: AppScreen.Map.name)
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             AppTopAppBar(
                 scrollBehavior = scrollBehavior,
