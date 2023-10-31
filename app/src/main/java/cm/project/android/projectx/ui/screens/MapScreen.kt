@@ -96,7 +96,7 @@ fun MapScreen(
     onShowRoutes: () -> Unit
 ) {
 
-    if (vm.userl == null) {
+    if (!vm.isReady) {
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
@@ -168,7 +168,11 @@ fun MapScreen(
                         }
                     ),
                     onClick = { _ ->
-                        vm.showDetails(poi)
+                        if (vm.user == null) {
+                            onAddUser()
+                        } else {
+                            vm.showDetails(poi)
+                        }
                         return@Marker true
                     }
                 )
@@ -223,10 +227,10 @@ fun MapScreen(
                 //
                 FloatingActionButton(
                     onClick = {
-                        if (vm.userl != null) {
-                            onUserDetails()
-                        } else {
+                        if (vm.user == null) {
                             onAddUser()
+                        } else {
+                            onUserDetails()
                         }
                     },
                     contentColor = Color.DarkGray,
@@ -266,11 +270,7 @@ fun MapScreen(
                 //
                 FloatingActionButton(
                     onClick = {
-                        if (vm.userl != null) {
-                            onShowRoutes()
-                        } else {
-                            onAddUser()
-                        }
+                        onShowRoutes()
                     },
                     contentColor = Color.DarkGray,
                     containerColor = Color.Yellow,
@@ -355,19 +355,19 @@ fun MapScreen(
                 //
                 ExtendedFloatingActionButton(
                     onClick = {
-                        if (vm.userl != null) {
-                            if (vm.location != null) {
-                                onAddPOI()
+                        if (vm.location != null) {
+                            if (vm.user == null) {
+                                onAddUser()
                             } else {
-                                Toast.makeText(
-                                    context,
-                                    "Please enable location",
-                                    Toast.LENGTH_SHORT
-                                )
-                                    .show()
+                                onAddPOI()
                             }
                         } else {
-                            onAddUser()
+                            Toast.makeText(
+                                context,
+                                "Please enable location",
+                                Toast.LENGTH_SHORT
+                            )
+                                .show()
                         }
                     },
                     icon = {
@@ -383,7 +383,14 @@ fun MapScreen(
                 //
                 if (!vm.isTrackingLocation) {
                     LargeFloatingActionButton(
-                        onClick = { vm.gotoUserLocation(); vm.startTrackingUserLocation() },
+                        onClick = {
+                            if (vm.user == null) {
+                                onAddUser()
+                            } else {
+                                vm.gotoUserLocation()
+                                vm.startTrackingUserLocation()
+                            }
+                        },
                         shape = CircleShape,
                         containerColor = Color.Green
                     ) {
@@ -459,9 +466,9 @@ fun MapScreen(
             ) {
                 POIDetails(
                     poi = vm.selectedPOI!!,
-                    uid = vm.user!!.uid,
+                    uid = vm.user!!.id,
                     ratePOI = { value ->
-                        vm.ratePOI(vm.selectedPOI!!, Rating(vm.user!!.uid, value))
+                        vm.ratePOI(vm.selectedPOI!!, Rating(vm.user!!.id, value))
                     },
                     updateUser = { id, type, xp ->
                         vm.updateUser(id, type, xp)
@@ -682,7 +689,7 @@ fun POIDetails(
                         onClick = {
                             ratePOI(true)
                             // check if user already rated this POI
-                            if (poi.ratings.none { it.user == uid} ) {
+                            if (poi.ratings.none { it.user == uid }) {
                                 updateUser(poi.createdBy, "received", 10)
                                 updateUser(uid, "given", 10)
                             }
@@ -699,7 +706,7 @@ fun POIDetails(
                         enabled = poi.ratings.none { it.user == uid && !it.value },
                         onClick = {
                             ratePOI(false)
-                            if (poi.ratings.none { it.user == uid} ) {
+                            if (poi.ratings.none { it.user == uid }) {
                                 updateUser(poi.createdBy, "received", 10)
                                 updateUser(uid, "given", 10)
                             }

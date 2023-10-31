@@ -251,6 +251,15 @@ fun AddPOIScreen(
                     ).show()
                     return@ExtendedFloatingActionButton
                 }
+                val u = vm.user
+                if (u == null) {
+                    Toast.makeText(
+                        context,
+                        "User is not logged in!",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@ExtendedFloatingActionButton
+                }
                 vm.addPOI(
                     POI(
                         name = name,
@@ -259,12 +268,12 @@ fun AddPOIScreen(
                         pictureUrl = "",
                         latitude = location.latitude,
                         longitude = location.longitude,
-                        createdBy = vm.user!!.uid,
+                        createdBy = u.id,
                         ratings = mutableListOf()
                     ),
                     imageUri!!
                 )
-                vm.updateUser(vm.user!!.uid, "added", 50)
+                vm.updateUser(u.id, "added", 50)
                 onBack()
             },
             icon = {

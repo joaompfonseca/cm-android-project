@@ -50,62 +50,74 @@ data class Rank(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShowUserDetails(
+    modifier: Modifier = Modifier,
     vm: AppViewModel = viewModel(),
-    onBack: () -> Unit,
-    modifier: Modifier = Modifier
+    onBack: () -> Unit
 ) {
 
-    vm.user?.let { vm.getUser(it.uid) }
 
-    val ranks = listOf(Rank("Rookie",0,999),
-        Rank("Explorer",1000,1999),
-        Rank("Adventurer",2000,2999),
-        Rank("Discoverer",3000,3999),
-        Rank("Expert",4000,4999),
-        Rank("Master",5000,5999),
-        Rank("Legend",6000,6999),
-        Rank("Hero",7000,7999),
-        Rank("God",8000,8999),
-        Rank("Creator",9000,9999))
+    val ranks = listOf(
+        Rank("Rookie", 0, 999),
+        Rank("Explorer", 1000, 1999),
+        Rank("Adventurer", 2000, 2999),
+        Rank("Discoverer", 3000, 3999),
+        Rank("Expert", 4000, 4999),
+        Rank("Master", 5000, 5999),
+        Rank("Legend", 6000, 6999),
+        Rank("Hero", 7000, 7999),
+        Rank("God", 8000, 8999),
+        Rank("Creator", 9000, 9999)
+    )
 
-    val levels = listOf(Level(1,0,9),
-        Level(2,10,19),
-        Level(3,20,29),
-        Level(4,30,39),
-        Level(5,40,49),
-        Level(6,50,59),
-        Level(7,60,69),
-        Level(8,70,79),
-        Level(9,80,89),
-        Level(10,90,99))
+    val levels = listOf(
+        Level(1, 0, 9),
+        Level(2, 10, 19),
+        Level(3, 20, 29),
+        Level(4, 30, 39),
+        Level(5, 40, 49),
+        Level(6, 50, 59),
+        Level(7, 60, 69),
+        Level(8, 70, 79),
+        Level(9, 80, 89),
+        Level(10, 90, 99)
+    )
 
-    Column {
+    Column(
+        modifier = modifier
+    ) {
         Row(modifier = Modifier.height(250.dp)) {
-            AsyncImage(model = vm.userl?.pictureUrl,
+            AsyncImage(
+                model = vm.user?.pictureUrl,
                 contentDescription = "User Picture",
                 modifier = Modifier
                     .padding(20.dp)
-                    .clip(RoundedCornerShape(20.dp)))
-            Column(modifier = Modifier
-                .padding(top = 50.dp)
-                ) {
-                Text(text = vm.user?.displayName ?: "No name",
+                    .clip(RoundedCornerShape(20.dp))
+            )
+            Column(
+                modifier = Modifier
+                    .padding(top = 50.dp)
+            ) {
+                Text(
+                    text = vm.user?.displayName ?: "No name",
                     fontSize = 30.sp,
                     textAlign = TextAlign.Center,
                     fontWeight = FontWeight.Bold,
                 )
-                Text(text = vm.userl?.username ?: "No name",
-                    modifier = Modifier)
+                Text(
+                    text = vm.user?.username ?: "No username",
+                    modifier = Modifier
+                )
             }
         }
 
         Row {
-            Row(modifier = Modifier
-                .padding(start = 20.dp, end = 20.dp)
-                .border(
-                    border = BorderStroke(1.dp, color = Color.Black),
-                    shape = RoundedCornerShape(20.dp),
-                )
+            Row(
+                modifier = Modifier
+                    .padding(start = 20.dp, end = 20.dp)
+                    .border(
+                        border = BorderStroke(1.dp, color = Color.Black),
+                        shape = RoundedCornerShape(20.dp),
+                    )
             ) {
                 Icon(
                     imageVector = Icons.Default.Done,
@@ -116,36 +128,61 @@ fun ShowUserDetails(
                         .height(50.dp)
                 )
                 Column(modifier = Modifier.padding(end = 10.dp)) {
-                    Text(text = "${vm.userl!!.totalXP}",
+                    Text(
+                        text = "${vm.user?.totalXP}",
                         fontSize = 20.sp,
                         modifier = Modifier
                             .padding(top = 5.dp)
                             .align(Alignment.CenterHorizontally),
                     )
-                    Text(text = "Total XP",
+                    Text(
+                        text = "Total XP",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(top = 5.dp))
+                        modifier = Modifier.padding(top = 5.dp)
+                    )
                 }
             }
             Column {
-                Text(text = "Rank: ${ranks[vm.userl!!.totalXP/1000].rank}",
+                Text(
+                    text = "Rank: ${ranks[(vm.user?.totalXP ?: 0) / 1000].rank}",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center)
-                Text(text = "${ranks[vm.userl!!.totalXP/1000].max + 1  - vm.userl!!.totalXP} XP to next rank",
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = "${ranks[(vm.user?.totalXP ?: 0) / 1000].max + 1 - (vm.user?.totalXP ?: 0)} XP to next rank",
                     modifier = Modifier.padding(top = 5.dp),
                     fontSize = 17.sp,
-                    textAlign = TextAlign.Center)
+                    textAlign = TextAlign.Center
+                )
             }
         }
 
 
-        Details(vm = vm, icon = Icons.Default.LocationOn, text = "AddedPOIs", number = vm.userl!!.addedPOIs, levels = levels)
-    
-        Details(vm = vm, icon = Icons.Default.Star, text = "Received Ratings", number = vm.userl!!.receivedRatings, levels = levels)
+        Details(
+            vm = vm,
+            icon = Icons.Default.LocationOn,
+            text = "AddedPOIs",
+            number = vm.user?.addedPOIs ?: 0,
+            levels = levels
+        )
 
-        Details(vm = vm, icon = Icons.Default.ThumbUp, text = "Given Ratings", number = vm.userl!!.givenRatings, levels = levels)
+        Details(
+            vm = vm,
+            icon = Icons.Default.Star,
+            text = "Received Ratings",
+            number = vm.user?.receivedRatings ?: 0,
+            levels = levels
+        )
+
+        Details(
+            vm = vm,
+            icon = Icons.Default.ThumbUp,
+            text = "Given Ratings",
+            number = vm.user?.givenRatings ?: 0,
+            levels = levels
+        )
     }
 }
 
@@ -167,13 +204,14 @@ fun Details(
         }
     }
 
-    Row(modifier = Modifier
-        .padding(top = 10.dp, start = 20.dp, end = 20.dp)
-        .border(
-            border = BorderStroke(1.dp, color = Color.Black),
-            shape = RoundedCornerShape(20.dp),
-        )
-        .fillMaxWidth()
+    Row(
+        modifier = Modifier
+            .padding(top = 10.dp, start = 20.dp, end = 20.dp)
+            .border(
+                border = BorderStroke(1.dp, color = Color.Black),
+                shape = RoundedCornerShape(20.dp),
+            )
+            .fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(start = 20.dp, top = 10.dp, bottom = 10.dp)) {
             Icon(
@@ -184,32 +222,40 @@ fun Details(
                     .height(50.dp)
                     .align(Alignment.CenterHorizontally)
             )
-            Text(text = "Level: ${l!!.level}",
+            Text(
+                text = "Level: ${l!!.level}",
                 modifier = Modifier,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center)
+                textAlign = TextAlign.Center
+            )
         }
-        Column(modifier = Modifier
-            .padding(start = 20.dp)){
-            Text(text = text,
+        Column(
+            modifier = Modifier
+                .padding(start = 20.dp)
+        ) {
+            Text(
+                text = text,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = 10.dp))
+                modifier = Modifier.padding(top = 10.dp)
+            )
             Row(modifier = Modifier.padding(top = 10.dp)) {
                 LinearProgressIndicator(
-                    progress = number.toFloat()/ l!!.max.toFloat(),
+                    progress = number.toFloat() / l!!.max.toFloat(),
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
                         .width(150.dp)
                         .height(30.dp)
                 )
-                Text(text = "$number/${l?.max!! + 1 ?: 0}",
+                Text(
+                    text = "$number/${l.max + 1}",
                     modifier = Modifier
                         .padding(start = 10.dp)
                         .align(Alignment.CenterVertically),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center)
+                    textAlign = TextAlign.Center
+                )
             }
         }
     }

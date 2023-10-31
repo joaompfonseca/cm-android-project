@@ -42,16 +42,15 @@ import cm.project.android.projectx.db.entities.POI
 import cm.project.android.projectx.db.entities.User
 import cm.project.android.projectx.ui.AppViewModel
 import coil.compose.AsyncImage
+import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddUserScreen(
+    modifier: Modifier = Modifier,
     vm: AppViewModel = viewModel(),
-    onBack: () -> Unit,
-    modifier: Modifier = Modifier
+    onBack: () -> Unit
 ) {
-
-    vm.user?.let { vm.getUser(it.uid) }
 
     var name by rememberSaveable { mutableStateOf("") }
 
@@ -177,9 +176,19 @@ fun AddUserScreen(
                     ).show()
                     return@ExtendedFloatingActionButton
                 }
+                val u = FirebaseAuth.getInstance().currentUser
+                if (u == null) {
+                    Toast.makeText(
+                        context,
+                        "User is not logged in!",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@ExtendedFloatingActionButton
+                }
                 vm.addUser(
                     User(
-                        id = (vm.user!!.uid),
+                        id = u.uid,
+                        displayName = u.displayName?: name,
                         username = name,
                         pictureUrl = "",
                         totalXP = 0,

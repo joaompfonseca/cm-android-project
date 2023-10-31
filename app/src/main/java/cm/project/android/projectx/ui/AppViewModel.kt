@@ -6,15 +6,13 @@ import android.content.Context
 import android.net.Uri
 import android.os.Looper
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.toMutableStateList
 import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import cm.project.android.projectx.db.entities.POI
 import cm.project.android.projectx.db.entities.Point
 import cm.project.android.projectx.db.entities.Rating
@@ -32,10 +30,14 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices.getFusedLocationProviderClient
 import com.google.android.gms.location.Priority
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.utsman.osmandcompose.CameraProperty
 import com.utsman.osmandcompose.CameraState
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.osmdroid.util.GeoPoint
+import java.lang.Thread.sleep
 import java.time.Instant
 import java.util.concurrent.TimeUnit
 import kotlin.math.PI
@@ -61,9 +63,10 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
     val routeRepository = RouteRepository()
 
-    val user = FirebaseAuth.getInstance().currentUser
+    var user by mutableStateOf<User?>(null)
+        private set
 
-    var userl by mutableStateOf<User?>(null)
+    var isReady by mutableStateOf(false)
         private set
 
     var poiList by mutableStateOf<List<POI>>(emptyList())
@@ -136,12 +139,23 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             Looper.getMainLooper()
         )
 
-        //
-        // POIs
-        //
+        waitForUserToLogin()
+    }
 
-        getPOIs()
-        user?.let { getUser(it.uid) }
+    @OptIn(DelicateCoroutinesApi::class)
+    fun waitForUserToLogin() {
+        GlobalScope.launch {
+            while (true) {
+                sleep(1000)
+                val u = FirebaseAuth.getInstance().currentUser
+                if (u != null) {
+                    user = userRepository.getUser(u.uid)
+                    poiList = poiRepository.getAllPOIs()
+                    isReady = true
+                    break
+                }
+            }
+        }
     }
 
     fun setCamera(latitude: Double, longitude: Double, zoom: Double) {
@@ -151,18 +165,6 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                 zoom = zoom
             )
         )
-    }
-
-    fun getPOIs() {
-        viewModelScope.launch {
-            poiList = poiRepository.getAllPOIs()
-        }
-    }
-
-    fun getUser(id: String) {
-        viewModelScope.launch {
-            userl = userRepository.getUser(id)
-        }
     }
 
     fun gotoUserLocation() {
@@ -183,7 +185,8 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     fun stopTrackingUserLocation() {
         viewModelScope.launch {
             isTrackingLocation = false
-            if (userl != null && routePoints.isNotEmpty()) {
+            val u = user
+            if (u != null && routePoints.isNotEmpty()) {
                 val originCoordinates =
                     "${routePoints.first().latitude},${routePoints.first().longitude}"
                 val destinationCoordinates =
@@ -237,9 +240,9 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                     totalDistance = totalDistance,
                     totalDuration = totalDuration,
                     routePoints.toMutableList(),
-                    userl!!.username
+                    u.username
                 )
-                addRoute(user!!.uid, route)
+                addRoute(u.id, route)
             }
             routePoints = emptyList()
         }
@@ -346,9 +349,9 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun addUser(user: User, imageUri: Uri) {
+    fun addUser(u: User, imageUri: Uri) {
         viewModelScope.launch {
-            userl = userRepository.saveUser(user, imageUri)
+            user = userRepository.saveUser(u, imageUri)
         }
     }
 
