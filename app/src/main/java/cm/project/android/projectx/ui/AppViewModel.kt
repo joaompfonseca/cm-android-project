@@ -158,6 +158,15 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun getUser() {
+        viewModelScope.launch {
+            val u = FirebaseAuth.getInstance().currentUser
+            if (u != null) {
+                user = userRepository.getUser(u.uid)
+            }
+        }
+    }
+
     fun setCamera(latitude: Double, longitude: Double, zoom: Double) {
         camera = CameraState(
             CameraProperty(

@@ -54,7 +54,7 @@ fun ShowUserDetails(
     vm: AppViewModel = viewModel(),
     onBack: () -> Unit
 ) {
-
+    vm.getUser() // Refresh user
 
     val ranks = listOf(
         Rank("Rookie", 0, 999),
