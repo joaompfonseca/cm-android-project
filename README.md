@@ -10,10 +10,11 @@ The backend is based on services provided by Firebase. It provides authenticatio
 
 ## Authors
 
-| NMec   | Name                            |
-| ------ |:------------------------------- |
-| 103154 | João Manuel Pedrosa Fonseca     |
-| 103183 | Diogo Luís de Albuquerque Paiva |
+- Diogo Paiva, 103183
+
+- João Fonseca, 103154
+
+
 
 ## General Resources
 
