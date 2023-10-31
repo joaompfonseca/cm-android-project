@@ -2,7 +2,7 @@
 
 ## Description
 
-This Android based application provides a community collaboration platform for bicycle users. It provides a map using CyclOSM (a custom OpenStreetMap layer), allows the creation of interest using the camera, recording of routes using the location and getting directions from the current location to a destination by calling an external navigation application. As a community, users can rate points of interest, share their routes and level up in the ranking system.
+This Android based application provides a community collaboration platform for bicycle users. It provides a map using CyclOSM (a custom OpenStreetMap layer), allows the creation of points of interest using the camera, recording of routes using the location and getting directions from the current location to a destination by calling an external navigation application. As a community, users can rate points of interest, share their routes and level up in the ranking system.
 
 The backend is based on services provided by Firebase. It provides authentication mechanisms, the database to store information about points of interest, recorded routes and users, and a storage for saving images of users and points of interest.
 
@@ -13,8 +13,6 @@ The backend is based on services provided by Firebase. It provides authenticatio
 - Diogo Paiva, 103183
 
 - João Fonseca, 103154
-
-
 
 ## General Resources
 
@@ -40,5 +38,3 @@ Using the Debug APK:
 | -------------- | -------- |
 | usera@mail.com | usera123 |
 | userb@mail.com | userb123 |
-
-
