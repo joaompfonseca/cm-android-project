@@ -1,8 +1,8 @@
 package cm.project.android.projectx.ui.screens
 
-import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
+import androidx.compose.material3.AlertDialog
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,8 +11,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,7 +31,6 @@ fun ShowRoutes(
     vm: AppViewModel = viewModel(),
     onBack: () -> Unit
 ) {
-
     Column(
         modifier = modifier
             .verticalScroll(rememberScrollState()),
@@ -42,6 +42,7 @@ fun ShowRoutes(
                 .fillMaxWidth()
         )
         vm.allDRoutes.forEach {
+            if (it.value.isEmpty()) return@forEach
             Column {
                 Text(
                     text = "Routes by: ${it.value.first().createdBy}",
@@ -113,17 +114,46 @@ fun RouteItem(
                 )
             )
             Text("Number of Points: ${route.points.size}")
-            Button(
-                onClick = {
-                    vm.displayRoute(route)
-                    onBack()
-                },
-                modifier = Modifier
-                    .padding(top = 20.dp)
-                    .fillMaxWidth()
+            Row(
+                modifier = Modifier.padding(top = 20.dp)
             ) {
-                Text("Display Route")
+                if (route.createdBy == vm.user?.username) {
+                    Button(
+                        onClick = { vm.showDeleteRoutePrompt() },
+                        colors = ButtonDefaults.textButtonColors(
+                            containerColor = Color.Red,
+                            contentColor = Color.White
+                        ),
+                        modifier = Modifier
+                            .padding(end = 10.dp)
+                    ) {
+                        Text(text = "Delete")
+                    }
+                }
+                Button(
+                    onClick = {
+                        vm.displayRoute(route)
+                        onBack()
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    Text("Display Route")
+                }
             }
         }
+    }
+    //
+    // Delete Route
+    //
+    if (vm.isDeleteRoutePrompt) {
+        CustomAlertDialog(
+            onDismissRequest = { vm.hideDeleteRoutePrompt() },
+            onConfirmation = { vm.user?.let { vm.deleteRoute(it.id, route) } },
+            dialogTitle = "Delete Route",
+            dialogText = "Do you want to delete this route?",
+            dismissText = "Cancel",
+            confirmText = "Delete"
+        )
     }
 }

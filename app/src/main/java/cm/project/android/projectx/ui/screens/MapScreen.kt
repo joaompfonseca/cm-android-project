@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,10 +24,8 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.ExitToApp
-import androidx.compose.material.icons.rounded.Face
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Person
-import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Send
 import androidx.compose.material3.AlertDialog
@@ -84,8 +81,6 @@ import com.utsman.osmandcompose.OpenStreetMap
 import com.utsman.osmandcompose.Polyline
 import com.utsman.osmandcompose.PolylineCap
 import com.utsman.osmandcompose.ZoomButtonVisibility
-import kotlinx.coroutines.delay
-import okhttp3.internal.wait
 import org.osmdroid.tileprovider.tilesource.ITileSource
 import org.osmdroid.tileprovider.tilesource.XYTileSource
 import org.osmdroid.util.GeoPoint
@@ -497,8 +492,8 @@ fun MapScreen(
         //
         // Save or Discard Recorded Route
         //
-        if (vm.isSavePrompt) {
-            SaveAlertDialog(
+        if (vm.isSaveRoutePrompt) {
+            CustomAlertDialog(
                 onDismissRequest = { vm.clearRoutePoints() },
                 onConfirmation = { vm.saveRoutePoints() },
                 dialogTitle = "Save Route",
@@ -507,10 +502,12 @@ fun MapScreen(
                 confirmText = "Save"
             )
         }
-
-        if (vm.isDeletePromp) {
-            SaveAlertDialog(
-                onDismissRequest = { vm.hidedeletePrompt() },
+        //
+        // Delete POI
+        //
+        if (vm.isDeletePOIPrompt) {
+            CustomAlertDialog(
+                onDismissRequest = { vm.hideDeletePOIPrompt() },
                 onConfirmation = { vm.selectedPOI?.let { vm.deletePOI(it) } },
                 dialogTitle = "Delete POI",
                 dialogText = "Do you want to delete this POI?",
@@ -546,16 +543,15 @@ fun MapScreen(
                     updateUser = { id, type, xp ->
                         vm.updateUser(id, type, xp)
                     },
-                    showdeletePrompt = { vm.showdeletePrompt() }
+                    showdeletePrompt = { vm.showDeletePOIPrompt() }
                 )
             }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SaveAlertDialog(
+fun CustomAlertDialog(
     onDismissRequest: () -> Unit,
     onConfirmation: () -> Unit,
     dialogTitle: String,

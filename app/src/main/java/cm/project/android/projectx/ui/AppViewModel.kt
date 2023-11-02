@@ -13,7 +13,6 @@ import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -33,9 +32,7 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices.getFusedLocationProviderClient
 import com.google.android.gms.location.Priority
-import com.google.android.play.integrity.internal.l
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.utsman.osmandcompose.CameraProperty
 import com.utsman.osmandcompose.CameraState
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -97,10 +94,14 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     var isTrackingLocation by mutableStateOf(false)
         private set
 
-    var isSavePrompt by mutableStateOf(false)
+    var isSaveRoutePrompt by mutableStateOf(false)
         private set
 
-    var isDeletePromp by mutableStateOf(false)
+    var isDeletePOIPrompt by mutableStateOf(false)
+        private set
+
+
+    var isDeleteRoutePrompt by mutableStateOf(false)
         private set
 
     var routePoints by mutableStateOf<List<Point>>(emptyList())
@@ -233,7 +234,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
     fun showSavePrompt() {
         viewModelScope.launch {
-            isSavePrompt = true
+            isSaveRoutePrompt = true
         }
     }
 
@@ -252,14 +253,14 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
     fun clearRoutePoints() {
         viewModelScope.launch {
-            isSavePrompt = false
+            isSaveRoutePrompt = false
             routePoints = emptyList()
         }
     }
 
     fun saveRoutePoints() {
         viewModelScope.launch {
-            isSavePrompt = false
+            isSaveRoutePrompt = false
             val u = user
             if (u != null && routePoints.isNotEmpty()) {
                 val originCoordinates =
@@ -362,6 +363,34 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             allRoutes = allRoutes.toMutableMap().apply {
                 set(uid, (get(uid) ?: emptyList()).toMutableList().apply { add(route) })
             } as HashMap<String, List<Route>>
+            allDRoutes = allRoutes
+        }
+    }
+
+    fun deleteRoute(uid: String, route: Route) {
+        viewModelScope.launch {
+            routeRepository.deleteRoute(uid, route)
+            allRoutes = allRoutes.toMutableMap().apply {
+                set(uid, (get(uid) ?: emptyList()).toMutableList().filter { it.hashCode() != route.hashCode() })
+            } as HashMap<String, List<Route>>
+            allDRoutes = allRoutes
+            if (route.hashCode() == displayRoute?.hashCode()) {
+                displayRoute = null
+                isDisplayRoute = false
+            }
+            isDeleteRoutePrompt = false
+        }
+    }
+
+    fun hideDeleteRoutePrompt() {
+        viewModelScope.launch {
+            isDeleteRoutePrompt = false
+        }
+    }
+
+    fun showDeleteRoutePrompt() {
+        viewModelScope.launch {
+            isDeleteRoutePrompt = true
         }
     }
 
@@ -454,19 +483,19 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             if (poi.hashCode() == selectedPOI?.hashCode()) {
                 selectedPOI = null
             }
-            isDeletePromp = false
+            isDeletePOIPrompt = false
         }
     }
 
-    fun hidedeletePrompt() {
+    fun hideDeletePOIPrompt() {
         viewModelScope.launch {
-            isDeletePromp = false
+            isDeletePOIPrompt = false
         }
     }
 
-    fun showdeletePrompt() {
+    fun showDeletePOIPrompt() {
         viewModelScope.launch {
-            isDeletePromp = true
+            isDeletePOIPrompt = true
         }
     }
 

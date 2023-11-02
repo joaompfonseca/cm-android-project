@@ -10,7 +10,7 @@ data class Route(
 ) {
     constructor(): this("", "", 0.0,0L,mutableListOf(),"")
     override fun hashCode(): Int {
-        return points.first().timestamp.hashCode()
+        return origin.hashCode() + destination.hashCode() + points.size.hashCode() + createdBy.hashCode()
     }
 
     override fun equals(other: Any?): Boolean {

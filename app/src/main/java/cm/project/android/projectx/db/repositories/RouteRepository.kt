@@ -44,4 +44,9 @@ class RouteRepository {
         val id = route.hashCode().toString()
         db.child(uid).child(id).setValue(route).await()
     }
+
+    suspend fun deleteRoute(uid: String, route: Route) {
+        val id = route.hashCode().toString()
+        db.child(uid).child(id).removeValue().await()
+    }
 }
