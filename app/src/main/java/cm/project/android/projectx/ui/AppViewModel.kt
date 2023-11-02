@@ -33,6 +33,7 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices.getFusedLocationProviderClient
 import com.google.android.gms.location.Priority
+import com.google.android.play.integrity.internal.l
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.utsman.osmandcompose.CameraProperty
@@ -43,6 +44,7 @@ import kotlinx.coroutines.launch
 import org.osmdroid.util.GeoPoint
 import java.lang.Thread.sleep
 import java.time.Instant
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 import kotlin.math.PI
 import kotlin.math.atan2
@@ -87,6 +89,9 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         private set
 
     var allRoutes by mutableStateOf<HashMap<String, List<Route>>>(HashMap())
+        private set
+
+    var allDRoutes by mutableStateOf<HashMap<String, List<Route>>>(HashMap())
         private set
 
     var isTrackingLocation by mutableStateOf(false)
@@ -163,6 +168,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         //
 
         waitForUserToLogin()
+        getAllRoutes()
     }
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -328,7 +334,23 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     fun getAllRoutes() {
         viewModelScope.launch {
             allRoutes = routeRepository.getAllRoutes()
+            allDRoutes = allRoutes
         }
+    }
+
+    fun filterRoutes(filter: String) {
+        var routesf = HashMap<String, List<Route>>()
+        if (filter.isEmpty()) {
+            routesf = allRoutes
+        }
+        val filter = filter.lowercase(Locale.ROOT)
+        for(r in allRoutes) {
+           val l = r.value.filter { it.origin.lowercase().contains(filter) || it.destination.lowercase().contains(filter) }
+              if (l.isNotEmpty()) {
+                routesf[r.key] = l
+              }
+        }
+        allDRoutes = routesf
     }
 
     fun addRoute(uid: String, route: Route) {

@@ -1,5 +1,6 @@
 package cm.project.android.projectx.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
@@ -29,13 +30,18 @@ fun ShowRoutes(
     vm: AppViewModel = viewModel(),
     onBack: () -> Unit
 ) {
-    vm.getAllRoutes()
 
     Column(
         modifier = modifier
             .verticalScroll(rememberScrollState()),
     ) {
-        vm.allRoutes.forEach {
+        SearchBar(
+            search = { vm.filterRoutes(it) },
+            modifier = Modifier
+                .padding(20.dp)
+                .fillMaxWidth()
+        )
+        vm.allDRoutes.forEach {
             Column {
                 Text(
                     text = "Routes by: ${it.value.first().createdBy}",
