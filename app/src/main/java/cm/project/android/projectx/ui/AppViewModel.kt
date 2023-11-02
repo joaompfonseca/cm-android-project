@@ -3,13 +3,17 @@ package cm.project.android.projectx.ui
 import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.net.Uri
+import android.os.BatteryManager
 import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -63,6 +67,10 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
     val routeRepository = RouteRepository()
 
+    var batteryStatus: Intent? = null
+    var batteryLevel by mutableStateOf(0.0f)
+        private set
+
     var user by mutableStateOf<User?>(null)
         private set
 
@@ -82,6 +90,9 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         private set
 
     var isTrackingLocation by mutableStateOf(false)
+        private set
+
+    var isSavePrompt by mutableStateOf(false)
         private set
 
     var routePoints by mutableStateOf<List<Point>>(emptyList())
@@ -139,6 +150,18 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             Looper.getMainLooper()
         )
 
+        //
+        // BATTERY
+        //
+
+        batteryStatus = IntentFilter(Intent.ACTION_BATTERY_CHANGED).let { ifilter ->
+            application.applicationContext.registerReceiver(null, ifilter)
+        }
+
+        //
+        // LOGIN
+        //
+
         waitForUserToLogin()
     }
 
@@ -151,9 +174,24 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                 if (u != null) {
                     user = userRepository.getUser(u.uid)
                     poiList = poiRepository.getAllPOIs()
+                    updateBatteryLevel()
                     isReady = true
                     break
                 }
+            }
+        }
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    fun updateBatteryLevel() {
+        GlobalScope.launch {
+            while (true) {
+                batteryStatus?.let { intent ->
+                    val level: Int = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
+                    val scale: Int = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
+                    batteryLevel = level * 100 / scale.toFloat()
+                }
+                sleep(10 * 1000)
             }
         }
     }
@@ -184,6 +222,12 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun showSavePrompt() {
+        viewModelScope.launch {
+            isSavePrompt = true
+        }
+    }
+
     fun startTrackingUserLocation() {
         viewModelScope.launch {
             isTrackingLocation = true
@@ -194,6 +238,19 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     fun stopTrackingUserLocation() {
         viewModelScope.launch {
             isTrackingLocation = false
+        }
+    }
+
+    fun clearRoutePoints() {
+        viewModelScope.launch {
+            isSavePrompt = false
+            routePoints = emptyList()
+        }
+    }
+
+    fun saveRoutePoints() {
+        viewModelScope.launch {
+            isSavePrompt = false
             val u = user
             if (u != null && routePoints.isNotEmpty()) {
                 val originCoordinates =
@@ -252,6 +309,9 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                     u.username
                 )
                 addRoute(u.id, route)
+            }
+            else {
+                Toast.makeText(getApplication(), "Error while saving route.", Toast.LENGTH_SHORT).show()
             }
             routePoints = emptyList()
         }

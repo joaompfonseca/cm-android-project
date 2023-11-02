@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,8 +28,10 @@ import androidx.compose.material.icons.rounded.ExitToApp
 import androidx.compose.material.icons.rounded.Face
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Send
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -39,9 +42,11 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFloatingActionButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -56,6 +61,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -145,7 +151,6 @@ fun MapScreen(
             },
             onMapLongClick = {
                 println("on long click -> ${it.latitude}, ${it.longitude}")
-
             },
             onFirstLoadListener = {
 
@@ -303,14 +308,53 @@ fun MapScreen(
                     )
                 }
             }
-            //
-            // Search Bar
-            //
-            SearchBar(
-                search = { vm.gotoSearch(it) },
-                modifier = Modifier
-                    .fillMaxWidth()
-            )
+            Column {
+                //
+                // Search Bar
+                //
+                SearchBar(
+                    search = { vm.gotoSearch(it) },
+                    modifier = Modifier
+                        .padding(bottom = 20.dp)
+                        .fillMaxWidth()
+                )
+                //
+                // Battery Level
+                //
+                Card(
+                    modifier = Modifier
+                        .height(55.dp)
+                        .fillMaxWidth()
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .padding(start = 10.dp, end = 10.dp)
+                            .fillMaxSize()
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_bicycle),
+                            contentDescription = "Battery Level",
+                            modifier = Modifier
+                                .size(50.dp)
+                                .padding(end = 10.dp)
+                        )
+                        Text(
+                            text = "${vm.batteryLevel.toInt()}%",
+                            modifier = Modifier
+                                .padding(end = 10.dp)
+                        )
+                        LinearProgressIndicator(
+                            progress = vm.batteryLevel / 100f,
+                            color = if (vm.batteryLevel > 20) Color.Green else Color.Red,
+                            trackColor = Color.Gray,
+                            modifier = Modifier
+                                .fillMaxWidth(1f)
+                                .fillMaxHeight(0.5f)
+                        )
+                    }
+                }
+            }
         }
         Column(
             modifier = Modifier
@@ -411,7 +455,12 @@ fun MapScreen(
                     }
                 } else {
                     LargeFloatingActionButton(
-                        onClick = { vm.stopTrackingUserLocation() },
+                        onClick = {
+                            vm.stopTrackingUserLocation()
+                            if (vm.routePoints.isNotEmpty()) {
+                                vm.showSavePrompt()
+                            }
+                        },
                         shape = CircleShape,
                         containerColor = Color.Red
                     ) {
@@ -446,7 +495,18 @@ fun MapScreen(
             }
         }
         //
-        // Create a Route
+        // Save or Discard Recorded Route
+        //
+        if (vm.isSavePrompt) {
+            SaveAlertDialog(
+                onDismissRequest = { vm.clearRoutePoints() },
+                onConfirmation = { vm.saveRoutePoints() },
+                dialogTitle = "Save Route",
+                dialogText = "Do you want to save this route?"
+            )
+        }
+        //
+        // Create a Route with Origin and Destination
         //
         if (vm.showRoute) {
             Dialog(onDismissRequest = { vm.hideRoute() }) {
@@ -477,6 +537,45 @@ fun MapScreen(
             }
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SaveAlertDialog(
+    onDismissRequest: () -> Unit,
+    onConfirmation: () -> Unit,
+    dialogTitle: String,
+    dialogText: String
+) {
+    AlertDialog(
+        title = {
+            Text(text = dialogTitle)
+        },
+        text = {
+            Text(text = dialogText)
+        },
+        onDismissRequest = {
+            onDismissRequest()
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onConfirmation()
+                }
+            ) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = {
+                    onDismissRequest()
+                }
+            ) {
+                Text("Discard")
+            }
+        }
+    )
 }
 
 @Composable
