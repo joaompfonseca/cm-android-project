@@ -536,14 +536,14 @@ fun MapScreen(
             ) {
                 POIDetails(
                     poi = vm.selectedPOI!!,
-                    uid = vm.user!!.id,
+                    vm = vm,
                     ratePOI = { value ->
                         vm.ratePOI(vm.selectedPOI!!, Rating(vm.user!!.id, value))
                     },
                     updateUser = { id, type, xp ->
                         vm.updateUser(id, type, xp)
                     },
-                    showdeletePrompt = { vm.showDeletePOIPrompt() }
+                    showDeletePrompt = { vm.showDeletePOIPrompt() }
                 )
             }
         }
@@ -723,10 +723,10 @@ fun SearchBar(
 @Composable
 fun POIDetails(
     poi: POI,
-    uid: String,
+    vm: AppViewModel,
     ratePOI: (Boolean) -> Unit,
     updateUser: (String, String, Int) -> Unit,
-    showdeletePrompt: () -> Unit,
+    showDeletePrompt: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -763,10 +763,16 @@ fun POIDetails(
                     modifier = Modifier
                         .padding(top = 20.dp)
                 )
-                if (poi.createdBy == uid) {
-                    Button(onClick = { showdeletePrompt() },
+                if (poi.createdBy == vm.user?.username) {
+                    Button(
+                        onClick = { showDeletePrompt() },
+                        colors = ButtonDefaults.textButtonColors(
+                            containerColor = Color.Red,
+                            contentColor = Color.White
+                        ),
                         modifier = Modifier
-                            .padding(top = 65.dp)) {
+                            .padding(top = 20.dp)
+                    ) {
                         Text(text = "Delete")
                     }
                 }
@@ -804,13 +810,13 @@ fun POIDetails(
                             containerColor = Color.Green.copy(alpha = 0.5f),
                             disabledContainerColor = Color.Green.copy(alpha = 0.2f)
                         ),
-                        enabled = poi.ratings.none { it.user == uid && it.value },
+                        enabled = poi.ratings.none { it.user == vm.user!!.id && it.value },
                         onClick = {
                             ratePOI(true)
                             // check if user already rated this POI
-                            if (poi.ratings.none { it.user == uid }) {
+                            if (poi.ratings.none { it.user == vm.user!!.id }) {
                                 updateUser(poi.createdBy, "received", 10)
-                                updateUser(uid, "given", 10)
+                                updateUser(vm.user!!.id, "given", 10)
                             }
                         }
                     ) {
@@ -822,12 +828,12 @@ fun POIDetails(
                             containerColor = Color.Red.copy(alpha = 0.5f),
                             disabledContainerColor = Color.Red.copy(alpha = 0.2f)
                         ),
-                        enabled = poi.ratings.none { it.user == uid && !it.value },
+                        enabled = poi.ratings.none { it.user == vm.user!!.id && !it.value },
                         onClick = {
                             ratePOI(false)
-                            if (poi.ratings.none { it.user == uid }) {
+                            if (poi.ratings.none { it.user == vm.user!!.id }) {
                                 updateUser(poi.createdBy, "received", 10)
-                                updateUser(uid, "given", 10)
+                                updateUser(vm.user!!.id, "given", 10)
                             }
                         }
                     ) {

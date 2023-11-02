@@ -12,13 +12,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.rounded.Send
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,7 +34,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -46,9 +43,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import cm.project.android.projectx.R
 import cm.project.android.projectx.db.entities.POI
 import cm.project.android.projectx.ui.AppViewModel
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 import org.osmdroid.util.GeoPoint
 import java.io.File
 
@@ -268,7 +262,7 @@ fun AddPOIScreen(
                         pictureUrl = "",
                         latitude = location.latitude,
                         longitude = location.longitude,
-                        createdBy = u.id,
+                        createdBy = u.username,
                         ratings = mutableListOf()
                     ),
                     imageUri!!

@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -25,13 +24,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import cm.project.android.projectx.R
 import cm.project.android.projectx.ui.AppViewModel
 import coil.compose.AsyncImage
 
@@ -100,7 +97,6 @@ fun ShowUserDetails(
                 Text(
                     text = vm.user?.displayName ?: "No name",
                     fontSize = 30.sp,
-                    textAlign = TextAlign.Center,
                     fontWeight = FontWeight.Bold,
                 )
                 Text(
@@ -110,12 +106,14 @@ fun ShowUserDetails(
             }
         }
 
-        Row {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Row(
                 modifier = Modifier
                     .padding(start = 20.dp, end = 20.dp)
                     .border(
-                        border = BorderStroke(1.dp, color = Color.Black),
+                        border = BorderStroke(1.dp, color = Color.White),
                         shape = RoundedCornerShape(20.dp),
                     )
             ) {
@@ -163,7 +161,7 @@ fun ShowUserDetails(
         Details(
             vm = vm,
             icon = Icons.Default.LocationOn,
-            text = "AddedPOIs",
+            text = "Added POIs",
             number = vm.user?.addedPOIs ?: 0,
             levels = levels
         )
@@ -208,7 +206,7 @@ fun Details(
         modifier = Modifier
             .padding(top = 10.dp, start = 20.dp, end = 20.dp)
             .border(
-                border = BorderStroke(1.dp, color = Color.Black),
+                border = BorderStroke(1.dp, color = Color.White),
                 shape = RoundedCornerShape(20.dp),
             )
             .fillMaxWidth()
