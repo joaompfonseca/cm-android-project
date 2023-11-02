@@ -502,7 +502,20 @@ fun MapScreen(
                 onDismissRequest = { vm.clearRoutePoints() },
                 onConfirmation = { vm.saveRoutePoints() },
                 dialogTitle = "Save Route",
-                dialogText = "Do you want to save this route?"
+                dialogText = "Do you want to save this route?",
+                dismissText = "Discard",
+                confirmText = "Save"
+            )
+        }
+
+        if (vm.isDeletePromp) {
+            SaveAlertDialog(
+                onDismissRequest = { vm.hidedeletePrompt() },
+                onConfirmation = { vm.selectedPOI?.let { vm.deletePOI(it) } },
+                dialogTitle = "Delete POI",
+                dialogText = "Do you want to delete this POI?",
+                dismissText = "Cancel",
+                confirmText = "Delete"
             )
         }
         //
@@ -532,7 +545,8 @@ fun MapScreen(
                     },
                     updateUser = { id, type, xp ->
                         vm.updateUser(id, type, xp)
-                    }
+                    },
+                    showdeletePrompt = { vm.showdeletePrompt() }
                 )
             }
         }
@@ -545,7 +559,9 @@ fun SaveAlertDialog(
     onDismissRequest: () -> Unit,
     onConfirmation: () -> Unit,
     dialogTitle: String,
-    dialogText: String
+    dialogText: String,
+    dismissText: String,
+    confirmText: String
 ) {
     AlertDialog(
         title = {
@@ -563,7 +579,7 @@ fun SaveAlertDialog(
                     onConfirmation()
                 }
             ) {
-                Text("Save")
+                Text(confirmText)
             }
         },
         dismissButton = {
@@ -572,7 +588,7 @@ fun SaveAlertDialog(
                     onDismissRequest()
                 }
             ) {
-                Text("Discard")
+                Text(dismissText)
             }
         }
     )
@@ -714,6 +730,7 @@ fun POIDetails(
     uid: String,
     ratePOI: (Boolean) -> Unit,
     updateUser: (String, String, Int) -> Unit,
+    showdeletePrompt: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -750,6 +767,13 @@ fun POIDetails(
                     modifier = Modifier
                         .padding(top = 20.dp)
                 )
+                if (poi.createdBy == uid) {
+                    Button(onClick = { showdeletePrompt() },
+                        modifier = Modifier
+                            .padding(top = 65.dp)) {
+                        Text(text = "Delete")
+                    }
+                }
             }
             Column {
                 Row(

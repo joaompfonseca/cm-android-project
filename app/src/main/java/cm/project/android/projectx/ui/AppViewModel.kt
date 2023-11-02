@@ -100,6 +100,9 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     var isSavePrompt by mutableStateOf(false)
         private set
 
+    var isDeletePromp by mutableStateOf(false)
+        private set
+
     var routePoints by mutableStateOf<List<Point>>(emptyList())
         private set
 
@@ -356,6 +359,9 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     fun addRoute(uid: String, route: Route) {
         viewModelScope.launch {
             routeRepository.saveRoute(uid, route)
+            allRoutes = allRoutes.toMutableMap().apply {
+                set(uid, (get(uid) ?: emptyList()).toMutableList().apply { add(route) })
+            } as HashMap<String, List<Route>>
         }
     }
 
@@ -437,6 +443,30 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             val savedPOI = poiRepository.savePOI(poi, imageUri)
             poiList = poiList.toMutableList().apply { add(savedPOI) }
+        }
+    }
+
+    fun deletePOI(poi: POI) {
+        viewModelScope.launch {
+            showDetails = false
+            poiRepository.deletePOI(poi)
+            poiList = poiList.toMutableList().apply { remove(poi) }
+            if (poi.hashCode() == selectedPOI?.hashCode()) {
+                selectedPOI = null
+            }
+            isDeletePromp = false
+        }
+    }
+
+    fun hidedeletePrompt() {
+        viewModelScope.launch {
+            isDeletePromp = false
+        }
+    }
+
+    fun showdeletePrompt() {
+        viewModelScope.launch {
+            isDeletePromp = true
         }
     }
 

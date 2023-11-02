@@ -87,4 +87,10 @@ class POIRepository {
         val id = poi.hashCode().toString()
         db.child(id).setValue(poi).await()
     }
+
+    suspend fun deletePOI(poi: POI) {
+        val id = poi.hashCode().toString()
+        db.child(id).removeValue().await()
+        storage.child("$id.jpg").delete().await()
+    }
 }
