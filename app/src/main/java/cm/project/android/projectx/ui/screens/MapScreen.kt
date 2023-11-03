@@ -640,7 +640,7 @@ fun OriginDestination(
                     .padding(top = 20.dp)
                     .fillMaxWidth()
             ) {
-                Text("${R.string.origin}: ")
+                Text("${stringResource(R.string.origin)}: ")
                 Text(
                     text = stringResource(R.string.current_location),
                     fontWeight = FontWeight.Bold
