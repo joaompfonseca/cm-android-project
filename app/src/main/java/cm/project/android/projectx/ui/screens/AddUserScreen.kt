@@ -92,7 +92,7 @@ fun AddUserScreen(
         Spacer(modifier = Modifier.padding(8.dp))
 
         Text(
-            text = stringResource(R.string.poi_name),
+            text = stringResource(R.string.user_name),
             style = MaterialTheme.typography.bodyLarge
         )
 
@@ -100,7 +100,7 @@ fun AddUserScreen(
             modifier = Modifier.fillMaxWidth(),
             value = name,
             onValueChange = { name = it },
-            placeholder = { Text(text = "e.g. username123") },
+            placeholder = { Text(stringResource(R.string.user_name_placeholder)) },
         )
 
 
@@ -111,7 +111,7 @@ fun AddUserScreen(
         Spacer(modifier = Modifier.padding(4.dp))
 
         Text(
-            text = stringResource(R.string.poi_picture),
+            text = stringResource(R.string.picture),
             style = MaterialTheme.typography.bodyLarge
         )
 
@@ -130,9 +130,7 @@ fun AddUserScreen(
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(
-                        text = "Select Image"
-                    )
+                    Text(stringResource(R.string.picture_select))
                 }
                 Button(
                     onClick = {
@@ -144,15 +142,13 @@ fun AddUserScreen(
                         .padding(top = 8.dp)
                         .fillMaxWidth(),
                 ) {
-                    Text(
-                        text = "Take photo"
-                    )
+                    Text(stringResource(R.string.picture_photo))
                 }
             }
             if (hasImage && imageUri != null) {
                 AsyncImage(
                     model = imageUri,
-                    contentDescription = "Selected Image",
+                    contentDescription = stringResource(R.string.picture_selected),
                     modifier = Modifier
                         .width(200.dp)
                         .padding(8.dp)
@@ -171,7 +167,7 @@ fun AddUserScreen(
                 if (name == "" || imageUri == null) {
                     Toast.makeText(
                         context,
-                        "Fill everything before submitting!",
+                        R.string.form_fill_everything,
                         Toast.LENGTH_SHORT
                     ).show()
                     return@ExtendedFloatingActionButton
@@ -180,7 +176,7 @@ fun AddUserScreen(
                 if (u == null) {
                     Toast.makeText(
                         context,
-                        "User is not logged in!",
+                        R.string.form_user_not_logged_in,
                         Toast.LENGTH_SHORT
                     ).show()
                     return@ExtendedFloatingActionButton
@@ -188,7 +184,7 @@ fun AddUserScreen(
                 vm.addUser(
                     User(
                         id = u.uid,
-                        displayName = u.displayName?: name,
+                        displayName = u.displayName ?: name,
                         username = name,
                         pictureUrl = "",
                         totalXP = 0,
@@ -203,14 +199,13 @@ fun AddUserScreen(
             icon = {
                 Icon(
                     imageVector = Icons.Rounded.Check,
-                    contentDescription = "Submit"
+                    contentDescription = stringResource(R.string.form_submit)
                 )
             },
-            text = { Text("Submit") },
+            text = { Text(stringResource(R.string.form_submit)) },
             containerColor = MaterialTheme.colorScheme.onPrimary,
             modifier = Modifier
                 .align(Alignment.End)
         )
-
     }
 }

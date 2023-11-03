@@ -109,7 +109,7 @@ fun AddPOIScreen(
             modifier = Modifier.fillMaxWidth(),
             value = name,
             onValueChange = { name = it },
-            placeholder = { Text(text = "e.g. City Park Water Fountain") },
+            placeholder = { Text(stringResource(R.string.poi_name_placeholder)) },
         )
 
         //
@@ -127,7 +127,7 @@ fun AddPOIScreen(
             modifier = Modifier.fillMaxWidth(),
             value = description,
             onValueChange = { description = it },
-            placeholder = { Text(text = "e.g. Drinkable water fountain with foot activation") },
+            placeholder = { Text(stringResource(R.string.poi_description_placeholder)) },
         )
 
         //
@@ -149,7 +149,7 @@ fun AddPOIScreen(
         ) {
             TextField(
                 value = type,
-                placeholder = { Text(text = "e.g. Fountain") },
+                placeholder = { Text(stringResource(R.string.poi_type_placeholder)) },
                 onValueChange = { },
                 readOnly = true,
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) },
@@ -180,7 +180,7 @@ fun AddPOIScreen(
         Spacer(modifier = Modifier.padding(4.dp))
 
         Text(
-            text = stringResource(R.string.poi_picture),
+            text = stringResource(R.string.picture),
             style = MaterialTheme.typography.bodyLarge
         )
 
@@ -199,9 +199,7 @@ fun AddPOIScreen(
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(
-                        text = "Select Image"
-                    )
+                    Text(stringResource(R.string.picture_select))
                 }
                 Button(
                     onClick = {
@@ -213,15 +211,13 @@ fun AddPOIScreen(
                         .padding(top = 8.dp)
                         .fillMaxWidth(),
                 ) {
-                    Text(
-                        text = "Take photo"
-                    )
+                    Text(stringResource(R.string.picture_photo))
                 }
             }
             if (hasImage && imageUri != null) {
                 AsyncImage(
                     model = imageUri,
-                    contentDescription = "Selected Image",
+                    contentDescription = stringResource(R.string.picture_selected),
                     modifier = Modifier
                         .width(200.dp)
                         .padding(8.dp)
@@ -240,7 +236,7 @@ fun AddPOIScreen(
                 if (name == "" || description == "" || type == "" || imageUri == null) {
                     Toast.makeText(
                         context,
-                        "Fill everything before submitting!",
+                        R.string.form_fill_everything,
                         Toast.LENGTH_SHORT
                     ).show()
                     return@ExtendedFloatingActionButton
@@ -249,7 +245,7 @@ fun AddPOIScreen(
                 if (u == null) {
                     Toast.makeText(
                         context,
-                        "User is not logged in!",
+                        R.string.form_user_not_logged_in,
                         Toast.LENGTH_SHORT
                     ).show()
                     return@ExtendedFloatingActionButton
@@ -273,15 +269,14 @@ fun AddPOIScreen(
             icon = {
                 Icon(
                     imageVector = Icons.Rounded.Check,
-                    contentDescription = "Submit"
+                    contentDescription = stringResource(R.string.form_submit)
                 )
             },
-            text = { Text("Submit") },
+            text = { Text(stringResource(R.string.form_submit)) },
             containerColor = MaterialTheme.colorScheme.onPrimary,
             modifier = Modifier
                 .align(Alignment.End)
         )
-
     }
 }
 

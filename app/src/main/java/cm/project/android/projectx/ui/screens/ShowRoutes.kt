@@ -17,11 +17,13 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import cm.project.android.projectx.R
 import cm.project.android.projectx.db.entities.Route
 import cm.project.android.projectx.ui.AppViewModel
 
@@ -45,7 +47,7 @@ fun ShowRoutes(
             if (it.value.isEmpty()) return@forEach
             Column {
                 Text(
-                    text = "Routes by: ${it.value.first().createdBy}",
+                    text = stringResource(R.string.routes_by, it.value.first().createdBy),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
@@ -86,14 +88,14 @@ fun RouteItem(
             modifier = Modifier.padding(10.dp)
         ) {
             Text(
-                text = "Origin",
+                text = stringResource(R.string.origin),
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp
             )
             Text(route.origin)
 
             Text(
-                text = "Destination",
+                text = stringResource(R.string.destination),
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
                 modifier = Modifier.padding(top = 20.dp)
@@ -101,19 +103,19 @@ fun RouteItem(
             Text(route.destination)
 
             Text(
-                text = "Metrics",
+                text = stringResource(R.string.metrics),
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
                 modifier = Modifier.padding(top = 20.dp)
             )
-            Text(String.format("%.3f meters, %d seconds", route.totalDistance, route.totalDuration))
+            Text(String.format(stringResource(R.string.metrics_distance_duration), route.totalDistance, route.totalDuration))
             Text(
                 String.format(
-                    "Average Speed: %.3f km/h",
+                    stringResource(R.string.metrics_avg_speed),
                     3.6 * (route.totalDistance / route.totalDuration)
                 )
             )
-            Text("Number of Points: ${route.points.size}")
+            Text(stringResource(R.string.number_of_points, route.points.size))
             Row(
                 modifier = Modifier.padding(top = 20.dp)
             ) {
@@ -127,7 +129,7 @@ fun RouteItem(
                         modifier = Modifier
                             .padding(end = 10.dp)
                     ) {
-                        Text(text = "Delete")
+                        Text(stringResource(R.string.delete))
                     }
                 }
                 Button(
@@ -138,7 +140,7 @@ fun RouteItem(
                     modifier = Modifier
                         .fillMaxWidth()
                 ) {
-                    Text("Display Route")
+                    Text(stringResource(R.string.display_route))
                 }
             }
         }
@@ -150,10 +152,10 @@ fun RouteItem(
         CustomAlertDialog(
             onDismissRequest = { vm.hideDeleteRoutePrompt() },
             onConfirmation = { vm.user?.let { vm.deleteRoute(it.id, route) } },
-            dialogTitle = "Delete Route",
-            dialogText = "Do you want to delete this route?",
-            dismissText = "Cancel",
-            confirmText = "Delete"
+            dialogTitle = stringResource(R.string.delete_route),
+            dialogText = stringResource(R.string.delete_route_prompt),
+            dismissText = stringResource(R.string.cancel),
+            confirmText = stringResource(R.string.delete)
         )
     }
 }

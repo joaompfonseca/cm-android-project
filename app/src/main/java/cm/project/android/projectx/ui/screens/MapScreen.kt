@@ -59,6 +59,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -148,7 +149,6 @@ fun MapScreen(
                 println("on long click -> ${it.latitude}, ${it.longitude}")
             },
             onFirstLoadListener = {
-
             }
         ) {
             vm.poiList.forEach { poi ->
@@ -240,7 +240,7 @@ fun MapScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.Person,
-                        contentDescription = "Profile",
+                        contentDescription = stringResource(R.string.profile),
                         modifier = Modifier.size(30.dp)
                     )
                 }
@@ -259,10 +259,10 @@ fun MapScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Rounded.ExitToApp,
-                            contentDescription = "Logout",
+                            contentDescription = stringResource(R.string.logout),
                             modifier = Modifier.size(30.dp)
                         )
-                        Text("Logout")
+                        Text(stringResource(R.string.logout))
                     }
                 }
                 //
@@ -279,7 +279,7 @@ fun MapScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.Send,
-                        contentDescription = "Routes",
+                        contentDescription = stringResource(R.string.routes),
                         modifier = Modifier
                             .size(30.dp)
                             .rotate(-45f)
@@ -297,7 +297,7 @@ fun MapScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.LocationOn,
-                        contentDescription = "Find Me!",
+                        contentDescription = stringResource(R.string.find_me),
                         modifier = Modifier
                             .size(30.dp)
                     )
@@ -329,7 +329,7 @@ fun MapScreen(
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.ic_bicycle),
-                            contentDescription = "Battery Level",
+                            contentDescription = stringResource(R.string.battery_level),
                             modifier = Modifier
                                 .size(50.dp)
                                 .padding(end = 10.dp)
@@ -375,9 +375,9 @@ fun MapScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Rounded.Close,
-                                contentDescription = "Clear Displayed Route"
+                                contentDescription = stringResource(R.string.clear_displayed_route)
                             )
-                            Text("Clear Displayed Route")
+                            Text(stringResource(R.string.clear_displayed_route))
                         }
                     }
                 }
@@ -403,7 +403,7 @@ fun MapScreen(
                         } else {
                             Toast.makeText(
                                 context,
-                                "Please enable location",
+                                R.string.permission_location,
                                 Toast.LENGTH_SHORT
                             )
                                 .show()
@@ -412,10 +412,10 @@ fun MapScreen(
                     icon = {
                         Icon(
                             imageVector = Icons.Rounded.Add,
-                            contentDescription = "Add POI"
+                            contentDescription = stringResource(R.string.add_poi_title)
                         )
                     },
-                    text = { Text("POI") }
+                    text = { Text(stringResource(R.string.poi)) }
                 )
                 //
                 // Track / Un-track User
@@ -438,12 +438,12 @@ fun MapScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.LocationOn,
-                                contentDescription = "Track me!",
+                                contentDescription = stringResource(R.string.track_me),
                                 tint = Color.DarkGray,
                                 modifier = Modifier.size(30.dp)
                             )
                             Text(
-                                text = "Track me!",
+                                text = stringResource(R.string.track_me),
                                 color = Color.DarkGray
                             )
                         }
@@ -464,10 +464,10 @@ fun MapScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.LocationOn,
-                                contentDescription = "Stop",
+                                contentDescription = stringResource(R.string.stop_tracking),
                                 modifier = Modifier.size(30.dp)
                             )
-                            Text("Stop")
+                            Text(stringResource(R.string.stop_tracking))
                         }
                     }
                 }
@@ -479,13 +479,13 @@ fun MapScreen(
                     icon = {
                         Icon(
                             imageVector = Icons.Rounded.Send,
-                            contentDescription = "Go to location",
+                            contentDescription = stringResource(R.string.go_to_location),
                             modifier = Modifier
                                 .rotate(-45f)
                                 .padding(bottom = 5.dp)
                         )
                     },
-                    text = { Text("GO") }
+                    text = { Text(stringResource(R.string.go)) }
                 )
             }
         }
@@ -496,10 +496,10 @@ fun MapScreen(
             CustomAlertDialog(
                 onDismissRequest = { vm.clearRoutePoints() },
                 onConfirmation = { vm.saveRoutePoints() },
-                dialogTitle = "Save Route",
-                dialogText = "Do you want to save this route?",
-                dismissText = "Discard",
-                confirmText = "Save"
+                dialogTitle = stringResource(R.string.save_route),
+                dialogText = stringResource(R.string.save_route_prompt),
+                dismissText = stringResource(R.string.discard),
+                confirmText = stringResource(R.string.save)
             )
         }
         //
@@ -509,10 +509,10 @@ fun MapScreen(
             CustomAlertDialog(
                 onDismissRequest = { vm.hideDeletePOIPrompt() },
                 onConfirmation = { vm.selectedPOI?.let { vm.deletePOI(it) } },
-                dialogTitle = "Delete POI",
-                dialogText = "Do you want to delete this POI?",
-                dismissText = "Cancel",
-                confirmText = "Delete"
+                dialogTitle = stringResource(R.string.delete_poi),
+                dialogText = stringResource(R.string.delete_poi_prompt),
+                dismissText = stringResource(R.string.cancel),
+                confirmText = stringResource(R.string.delete)
             )
         }
         //
@@ -616,7 +616,7 @@ fun OriginDestination(
                     .fillMaxWidth()
             ) {
                 Text(
-                    text = "Where to go?",
+                    text = stringResource(R.string.where_to_go),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
@@ -630,7 +630,7 @@ fun OriginDestination(
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.Close,
-                        contentDescription = "Close"
+                        contentDescription = stringResource(R.string.close)
                     )
                 }
             }
@@ -640,9 +640,9 @@ fun OriginDestination(
                     .padding(top = 20.dp)
                     .fillMaxWidth()
             ) {
-                Text("Origin: ")
+                Text("${R.string.origin}: ")
                 Text(
-                    text = "Current Location",
+                    text = stringResource(R.string.current_location),
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -655,7 +655,7 @@ fun OriginDestination(
                 TextField(
                     value = dest,
                     onValueChange = { dest = it },
-                    placeholder = { Text("Destination") },
+                    placeholder = { Text(stringResource(R.string.destination)) },
                     keyboardActions = KeyboardActions(
                         onSearch = {
                             routing(dest)
@@ -673,7 +673,7 @@ fun OriginDestination(
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.Send,
-                        contentDescription = "Go"
+                        contentDescription = stringResource(R.string.go)
                     )
                 }
             }
@@ -693,7 +693,7 @@ fun SearchBar(
         TextField(
             value = query,
             onValueChange = { query = it },
-            placeholder = { Text("Search") },
+            placeholder = { Text(stringResource(R.string.search)) },
             keyboardActions = KeyboardActions(
                 onSearch = {
                     search(query)
@@ -713,7 +713,7 @@ fun SearchBar(
         ) {
             Icon(
                 imageVector = Icons.Rounded.Search,
-                contentDescription = "Search",
+                contentDescription = stringResource(R.string.search),
                 modifier = Modifier.size(30.dp)
             )
         }
@@ -759,7 +759,7 @@ fun POIDetails(
                     text = poi.description
                 )
                 Text(
-                    text = "Added by: ${poi.createdBy}",
+                    text = stringResource(R.string.added_by, poi.createdBy),
                     modifier = Modifier
                         .padding(top = 20.dp)
                 )
@@ -773,7 +773,7 @@ fun POIDetails(
                         modifier = Modifier
                             .padding(top = 20.dp)
                     ) {
-                        Text(text = "Delete")
+                        Text(stringResource(R.string.delete))
                     }
                 }
             }
@@ -786,7 +786,7 @@ fun POIDetails(
                 ) {
                     if (poi.pictureUrl == "") {
                         Text(
-                            text = "No image available",
+                            text = stringResource(R.string.no_image_available),
                             textAlign = TextAlign.Center,
                             modifier = Modifier
                                 .fillMaxSize()
@@ -794,7 +794,7 @@ fun POIDetails(
                     } else {
                         AsyncImage(
                             model = poi.pictureUrl,
-                            contentDescription = "POI Image",
+                            contentDescription = stringResource(R.string.poi_image),
                             modifier = Modifier
                                 .clip(RoundedCornerShape(20.dp))
                         )
